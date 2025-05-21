@@ -29,7 +29,7 @@ const Sessions = () => {
                 toast({
                     title: "Success",
                     description: "Session deleted successfully",
-                })
+                });
             },
             onError: (error) => {
                 toast({
@@ -39,7 +39,7 @@ const Sessions = () => {
                 })
             }
         })
-    }, []);
+    }, [mutate, refetch]);
 
     return (
         <div className="via-root to-root rounded-xl bg-gradient-to-r p-0.5">

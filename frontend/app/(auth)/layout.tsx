@@ -1,3 +1,5 @@
+import { Toaster } from "@/components/ui/toaster";
+
 export default function AuthLayout({
     children,
 }: Readonly<{
@@ -8,6 +10,7 @@ export default function AuthLayout({
             <div className="w-full h-full flex items-center justify-center">
                 <div className="w-full max-w-[450px] mx-auto h-auto ">{children}</div>
             </div>
+            <Toaster />
         </div>
     );
 }

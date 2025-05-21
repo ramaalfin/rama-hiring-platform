@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NOT_FOUND, OK } from "../constants/http";
+import { NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http";
 import SessionModel from "../model/session.model";
 import catchErrors from "../utils/catchErros";
 import appAssert from "../utils/appAssert";
@@ -29,7 +29,7 @@ export const getAllSessionController = catchErrors(async (req, res) => {
   const modifiedSessions = sessions.map((session) => {
     return {
       ...session.toObject(),
-      ...(session.id === sessionId && { current: true }),
+      ...(session.id === sessionId && { isCurrent: true }),
     };
   });
 
@@ -49,7 +49,10 @@ export const getSessionController = catchErrors(async (req, res) => {
 
   // clear auth cookie if session is not found
   if (!session) {
-    return clearAuthCookies(res);
+    clearAuthCookies(res);
+    return res.status(UNAUTHORIZED).json({
+      message: "Session not found",
+    });
   }
 
   const { userId: user } = session;
