@@ -4,7 +4,7 @@ import useAuth from "@/hooks/use-auth";
 import React, { createContext, useContext } from "react";
 
 type UserType = {
-    name: string;
+    fullName: string;
     email: string;
     isEmailVerified: boolean;
     createdAt: string;

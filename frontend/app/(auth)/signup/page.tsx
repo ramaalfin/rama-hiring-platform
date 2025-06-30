@@ -26,7 +26,7 @@ export default function SignUp() {
         mutationFn: registerMutationFn
     })
     const formSchema = z.object({
-        name: z.string().trim().min(1, {
+        fullName: z.string().trim().min(1, {
             message: "Name is required",
         }),
         email: z.string().trim().email().min(1, {
@@ -47,7 +47,7 @@ export default function SignUp() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
+            fullName: "",
             email: "",
             password: "",
             confirmPassword: "",
@@ -92,7 +92,7 @@ export default function SignUp() {
                                 <div className="mb-4">
                                     <FormField
                                         control={form.control}
-                                        name="name"
+                                        name="fullName"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="dark:text-[#f1f7feb5] text-sm">

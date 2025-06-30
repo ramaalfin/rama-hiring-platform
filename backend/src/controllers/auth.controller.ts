@@ -21,7 +21,7 @@ import {
   registerSchema,
   resetPasswordSchema,
   verificationEmailSchema,
-} from "./auth.schemas";
+} from "../schemas/auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import SessionModel from "../model/session.model";
 import appAssert from "../utils/appAssert";
@@ -32,9 +32,9 @@ export const registerController = catchErrors(async (req, res) => {
     userAgent: req.headers["user-agent"],
   });
 
-  const { user, accessToken, refreshToken } = await createAccount(request);
+  const { user } = await createAccount(request);
 
-  setAuthCookies({ res, accessToken, refreshToken });
+  // setAuthCookies({ res, accessToken, refreshToken });
   return res.status(CREATED).json(user);
 });
 

@@ -46,7 +46,6 @@ export default function Login() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     mutate(values, {
       onSuccess: () => {
-        // redirect to dashboard
         router.replace("/home");
       },
       onError: (error) => {

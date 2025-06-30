@@ -27,6 +27,7 @@ import {
 import { hashValue } from "../utils/bcrypt";
 
 export type CreateAccountData = {
+  fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -38,6 +39,7 @@ export const createAccount = async (data: CreateAccountData) => {
   appAssert(!existingUser, CONFLICT, "Email already in use");
 
   const user = await UserModel.create({
+    fullName: data.fullName,
     email: data.email,
     password: data.password,
   });

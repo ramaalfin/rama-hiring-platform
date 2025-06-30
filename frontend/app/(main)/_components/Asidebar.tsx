@@ -114,12 +114,12 @@ const Asidebar = () => {
                                         >
                                             <Avatar className="h-8 w-8 rounded-lg">
                                                 <AvatarFallback className="rounded-lg">
-                                                    {user?.name?.split(" ")?.[0].charAt(0)}
-                                                    {user?.name?.split(" ")?.[1].charAt(0)}
+                                                    {user?.fullName?.split(" ")?.[0].charAt(0)}
+                                                    {user?.fullName?.split(" ")?.[1].charAt(0)}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                                <span className="truncate font-semibold">{user?.name}</span>
+                                                <span className="truncate font-semibold">{user?.fullName}</span>
                                                 <span className="truncate text-xs">{user?.email}</span>
                                             </div>
                                             <EllipsisIcon className="ml-auto size-4" />

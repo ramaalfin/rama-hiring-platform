@@ -6,7 +6,7 @@ type LoginType = {
 };
 
 type RegisterType = {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
