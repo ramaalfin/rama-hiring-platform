@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import connectToDatabase from "./config/db";
+// import connectToDatabase from "./config/db";
 import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -34,5 +34,4 @@ app.use(errorHandler);
 
 app.listen(PORT, async () => {
   console.log(`Server running at ${PORT} in ${NODE_ENV} mode`);
-  await connectToDatabase();
 });

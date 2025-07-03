@@ -59,7 +59,7 @@ export const verifyEmailMutationFn = async (data: VerifyEmailType) => {
   await API.post("/auth/email/verify", data);
 };
 
-export const getUserSessionQueryFn = async () => await API.get("/sessions/");
+export const getUserSessionQueryFn = async () => await API.get("/sessions");
 
 export const sessionQueryFn = async () => {
   const response = await API.get<SessionResponseType>("/sessions/all");

@@ -4,9 +4,9 @@ import {
   createAccount,
   loginUser,
   refreshUserAccessToken,
-  resetPassword,
-  sendPasswordResetEmail,
-  verifyEmail,
+  // resetPassword,
+  // sendPasswordResetEmail,
+  // verifyEmail,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
@@ -23,8 +23,9 @@ import {
   verificationEmailSchema,
 } from "../schemas/auth.schemas";
 import { verifyToken } from "../utils/jwt";
-import SessionModel from "../model/session.model";
+// import SessionModel from "../model/session.model";
 import appAssert from "../utils/appAssert";
+import prisma from "../prisma/client";
 
 export const registerController = catchErrors(async (req, res) => {
   const request = registerSchema.parse({
@@ -57,7 +58,17 @@ export const logoutController = catchErrors(async (req, res) => {
   const { payload } = verifyToken(accessToken);
 
   if (payload) {
-    await SessionModel.findByIdAndDelete(payload.sessionId);
+    // await SessionModel.deleteOne({
+    //   _id: payload.sessionId,
+    //   userId: payload.userId,
+    // });
+
+    await prisma.session.deleteMany({
+      where: {
+        id: payload.sessionId,
+        userId: payload.userId,
+      },
+    });
   }
 
   clearAuthCookies(res);
@@ -87,35 +98,35 @@ export const refreshController = catchErrors(async (req, res) => {
     });
 });
 
-export const verifyEmailController = catchErrors(async (req, res) => {
-  const { code } = verificationEmailSchema.parse(req.body);
+// export const verifyEmailController = catchErrors(async (req, res) => {
+//   const { code } = verificationEmailSchema.parse(req.body);
 
-  await verifyEmail(code);
+//   await verifyEmail(code);
 
-  return res.status(OK).json({
-    message: "Email was successfully verify",
-  });
-});
+//   return res.status(OK).json({
+//     message: "Email was successfully verify",
+//   });
+// });
 
-export const sendPasswordResetController = catchErrors(async (req, res) => {
-  const email = emailSchema.parse(req.body.email);
+// export const sendPasswordResetController = catchErrors(async (req, res) => {
+//   const email = emailSchema.parse(req.body.email);
 
-  // call service
-  await sendPasswordResetEmail(email);
+//   // call service
+//   await sendPasswordResetEmail(email);
 
-  return res.status(OK).json({
-    message: "Password reset email sent",
-  });
-});
+//   return res.status(OK).json({
+//     message: "Password reset email sent",
+//   });
+// });
 
-export const resetPasswordController = catchErrors(async (req, res) => {
-  const request = resetPasswordSchema.parse(req.body);
+// export const resetPasswordController = catchErrors(async (req, res) => {
+//   const request = resetPasswordSchema.parse(req.body);
 
-  // call service
-  await resetPassword(request);
+//   // call service
+//   await resetPassword(request);
 
-  clearAuthCookies(res);
-  return res.status(OK).json({
-    message: "Password reset successful",
-  });
-});
+//   clearAuthCookies(res);
+//   return res.status(OK).json({
+//     message: "Password reset successful",
+//   });
+// });
