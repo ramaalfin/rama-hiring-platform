@@ -4,6 +4,7 @@ import {
   createAccount,
   loginUser,
   refreshUserAccessToken,
+  verifyEmail,
   // resetPassword,
   // sendPasswordResetEmail,
   // verifyEmail,
@@ -33,10 +34,17 @@ export const registerController = catchErrors(async (req, res) => {
     userAgent: req.headers["user-agent"],
   });
 
-  const { user } = await createAccount(request);
+  const { user, accessToken, refreshToken } = await createAccount(request);
 
-  // setAuthCookies({ res, accessToken, refreshToken });
-  return res.status(CREATED).json(user);
+  setAuthCookies({ res, accessToken, refreshToken });
+  return res.status(CREATED).json({
+    message: "Account created successfully",
+    user: {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+    },
+  });
 });
 
 export const loginController = catchErrors(async (req, res) => {
@@ -98,15 +106,15 @@ export const refreshController = catchErrors(async (req, res) => {
     });
 });
 
-// export const verifyEmailController = catchErrors(async (req, res) => {
-//   const { code } = verificationEmailSchema.parse(req.body);
+export const verifyEmailController = catchErrors(async (req, res) => {
+  const { code } = verificationEmailSchema.parse(req.body);
 
-//   await verifyEmail(code);
+  await verifyEmail(code);
 
-//   return res.status(OK).json({
-//     message: "Email was successfully verify",
-//   });
-// });
+  return res.status(OK).json({
+    message: "Email was successfully verify",
+  });
+});
 
 // export const sendPasswordResetController = catchErrors(async (req, res) => {
 //   const email = emailSchema.parse(req.body.email);

@@ -54,13 +54,14 @@ export default function SignUp() {
         },
     });
 
+    console.log("Form values:", form.getValues());
+
     const onSubmit = (values: z.infer<typeof formSchema>) => {
         mutate(values, {
             onSuccess: () => {
                 setIsSubmited(true);
             },
             onError: (error) => {
-                console.error(error);
                 toast({
                     title: "Error",
                     description: error.message,

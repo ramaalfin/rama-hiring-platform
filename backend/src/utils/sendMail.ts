@@ -58,7 +58,7 @@ export const sendVerificationEmail = async (
   email: string,
   verificationCode: string
 ): Promise<void> => {
-  const verificationUrl = `${APP_ORIGIN}/verify-email?code=${verificationCode}`;
+  const verificationUrl = `${APP_ORIGIN}/confirm-account?code=${verificationCode}`;
 
   await transporter.sendMail({
     from: `"Your App" <${GMAIL_USER}>`,

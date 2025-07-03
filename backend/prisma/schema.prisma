@@ -13,13 +13,13 @@ model User {
   email          String             @unique
   password       String
   verified       Boolean            @default(false)
-  sessions       Session[]
-  verifications  VerificationCode[]
   isTwoFAEnabled Boolean            @default(false)
   twoFAEmailCode String?
   twoFAExpiresAt DateTime?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
+  sessions       Session[]
+  verifications  VerificationCode[]
 }
 
 model Session {

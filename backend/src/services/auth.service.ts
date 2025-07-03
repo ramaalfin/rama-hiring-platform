@@ -47,17 +47,10 @@ export type CreateAccountData = {
 };
 
 export const createAccount = async (data: CreateAccountData) => {
-  // const existingUser = await UserModel.exists({ email: data.email });
   const existingUser = await prisma.user.findUnique({
     where: { email: data.email },
   });
   appAssert(!existingUser, CONFLICT, "Email already in use");
-
-  // const user = await UserModel.create({
-  //   fullName: data.fullName,
-  //   email: data.email,
-  //   password: data.password,
-  // });
 
   const user = await prisma.user.create({
     data: {
@@ -67,45 +60,22 @@ export const createAccount = async (data: CreateAccountData) => {
     },
   });
 
-  const userId = user.id;
-
-  // const verificationCode = await VerificationCodeModel.create({
-  //   userId,
-  //   type: VerificationCodeType.EmailVerification,
-  //   expiresAt: oneYearFromNow(),
-  // });
-
   const verificationCode = await prisma.verificationCode.create({
     data: {
-      userId: userId.toString(),
+      userId: user.id.toString(),
       type: VerificationCodeType.EmailVerification,
       expiresAt: oneYearFromNow(),
       createdAt: new Date(),
     },
   });
 
-  const url = `${APP_ORIGIN}/confirm-account?code=${verificationCode.id}`;
-  // send email verif code
-  // const { error } = await sendMail({
-  //   to: user.email,
-  //   ...getVerifyEmailTemplate(url),
-  // });
+  const verifyCode = verificationCode.id;
 
-  await sendVerificationEmail(user.email, verificationCode.id);
-
-  // if (error) {
-  //   console.log(error);
-  // }
-
-  // create session
-  // const session = await SessionModel.create({
-  //   userId,
-  //   userAgent: data.userAgent,
-  // });
+  await sendVerificationEmail(user.email, verifyCode);
 
   const session = await prisma.session.create({
     data: {
-      userId,
+      userId: user.id,
       userAgent: data.userAgent,
       expiresAt: oneYearFromNow(),
     },
@@ -118,7 +88,7 @@ export const createAccount = async (data: CreateAccountData) => {
 
   const accessToken = signToken({
     sessionId: session.id,
-    userId,
+    userId: user.id,
   });
 
   return { user: user, refreshToken, accessToken };
@@ -206,47 +176,50 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   return { accessToken, newRefreshToken };
 };
 
-// export const verifyEmail = async (code: string) => {
-//   // get verification code
-//   // const validCode = await VerificationCodeModel.findOne({
-//   //   id: code,
-//   //   type: VerificationCodeType.EmailVerification,
-//   //   expiresAt: { $gt: new Date() },
-//   // });
+export const verifyEmail = async (code: string) => {
+  // get verification code
+  // const validCode = await VerificationCodeModel.findOne({
+  //   id: code,
+  //   type: VerificationCodeType.EmailVerification,
+  //   expiresAt: { $gt: new Date() },
+  // });
 
-//   const validCode = await prisma.verificationCode.findUnique({
-//     where: {
-//       id: code,
-//       type: VerificationCodeType.EmailVerification,
-//       expiresAt: { gt: new Date() },
-//     },
-//   });
+  const validCode = await prisma.verificationCode.findUnique({
+    where: {
+      id: code,
+      type: VerificationCodeType.EmailVerification,
+      expiresAt: { gt: new Date() },
+    },
+  });
 
-//   appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
 
-//   // update user to verified true
-//   // const updateUser = await UserModel.findByIdAndUpdate(
-//   //   validCode.userId,
-//   //   {
-//   //     verified: true,
-//   //   },
-//   //   { new: true }
-//   // );
+  // update user to verified true
+  // const updateUser = await UserModel.findByIdAndUpdate(
+  //   validCode.userId,
+  //   {
+  //     verified: true,
+  //   },
+  //   { new: true }
+  // );
 
-//   const updateUser = await prisma.user.update({
-//     where: { id: validCode.userId },
-//     data: { verified: true },
-//   });
+  const updateUser = await prisma.user.update({
+    where: { id: validCode.userId },
+    data: { verified: true },
+  });
 
-//   appAssert(updateUser, INTERNAL_SERVER_ERROR, "Failed to verify email");
+  appAssert(updateUser, INTERNAL_SERVER_ERROR, "Failed to verify email");
 
-//   // delete verif code
-//   await validCode.deleteOne();
+  // delete verif code
+  // await validCode.deleteOne();
+  await prisma.verificationCode.delete({
+    where: { id: validCode.id },
+  });
 
-//   return {
-//     user: updateUser.omitPassword(),
-//   };
-// };
+  return {
+    user: updateUser,
+  };
+};
 
 // export const sendPasswordResetEmail = async (email: string) => {
 //   // get the user by email
