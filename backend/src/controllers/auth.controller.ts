@@ -1,4 +1,3 @@
-import { z } from "zod";
 import catchErrors from "../utils/catchErros";
 import {
   createAccount,
@@ -6,7 +5,7 @@ import {
   refreshUserAccessToken,
   verifyEmail,
   // resetPassword,
-  // sendPasswordResetEmail,
+  forgotPasswordService,
   // verifyEmail,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
@@ -24,7 +23,6 @@ import {
   verificationEmailSchema,
 } from "../schemas/auth.schemas";
 import { verifyToken } from "../utils/jwt";
-// import SessionModel from "../model/session.model";
 import appAssert from "../utils/appAssert";
 import prisma from "../prisma/client";
 
@@ -116,16 +114,16 @@ export const verifyEmailController = catchErrors(async (req, res) => {
   });
 });
 
-// export const sendPasswordResetController = catchErrors(async (req, res) => {
-//   const email = emailSchema.parse(req.body.email);
+export const forgotPasswordController = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
 
-//   // call service
-//   await sendPasswordResetEmail(email);
+  // call service
+  await forgotPasswordService(email);
 
-//   return res.status(OK).json({
-//     message: "Password reset email sent",
-//   });
-// });
+  return res.status(OK).json({
+    message: "Password reset email sent",
+  });
+});
 
 // export const resetPasswordController = catchErrors(async (req, res) => {
 //   const request = resetPasswordSchema.parse(req.body);

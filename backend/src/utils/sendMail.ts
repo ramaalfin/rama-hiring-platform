@@ -72,11 +72,11 @@ export const sendVerificationEmail = async (
   });
 };
 
-export const sendPasswordResetEmail = async (
+export const sendForgotPasswordEmail = async (
   email: string,
-  token: string
+  url: string
 ): Promise<void> => {
-  const resetUrl = `${APP_ORIGIN}/reset-password?token=${token}`;
+  // const url = `${APP_ORIGIN}/reset-password?token=${token}`;
 
   await transporter.sendMail({
     from: `"Your App" <${GMAIL_USER}>`,
@@ -84,7 +84,7 @@ export const sendPasswordResetEmail = async (
     subject: "Password Reset Request",
     html: `
       <p>You requested a password reset. Click the link below to reset your password:</p>
-      <a href="${resetUrl}">${resetUrl}</a>
+      <a href="${url}">${url}</a>
       <p>This link will expire in 1 hour.</p>
       <p>If you didn't request this, please ignore this email.</p>
     `,

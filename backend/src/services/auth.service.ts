@@ -22,8 +22,8 @@ import { refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
 // import { sendMail } from "../utils/sendMail";
 import {
   sendVerificationEmail,
-  sendPasswordResetEmail,
   sendTwoFACode,
+  sendForgotPasswordEmail,
 } from "../utils/sendMail";
 import {
   getPasswordResetTemplate,
@@ -221,70 +221,65 @@ export const verifyEmail = async (code: string) => {
   };
 };
 
-// export const sendPasswordResetEmail = async (email: string) => {
-//   // get the user by email
-//   // const user = await UserModel.findOne({ email });
-//   const user = await prisma.user.findUnique({
-//     where: { email },
-//   });
-//   appAssert(user, NOT_FOUND, "User not found");
+export const forgotPasswordService = async (email: string) => {
+  // get the user by email
+  // const user = await UserModel.findOne({ email });
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  appAssert(user, NOT_FOUND, "User not found");
 
-//   // check email rate limit
-//   const fiveMinAgo = fiveMinutesAgo();
-//   // const emailCount = await VerificationCodeModel.countDocuments({
-//   //   userId: user.id,
-//   //   type: VerificationCodeType.PasswordReset,
-//   //   createdAt: { $gt: fiveMinAgo },
-//   // });
-//   const emailCount = await prisma.verificationCode.count({
-//     where: {
-//       userId: user.id,
-//       type: VerificationCodeType.PasswordReset,
-//       createdAt: { gt: fiveMinAgo },
-//     },
-//   });
+  // check email rate limit
+  const fiveMinAgo = fiveMinutesAgo();
+  // const emailCount = await VerificationCodeModel.countDocuments({
+  //   userId: user.id,
+  //   type: VerificationCodeType.PasswordReset,
+  //   createdAt: { $gt: fiveMinAgo },
+  // });
+  const emailCount = await prisma.verificationCode.count({
+    where: {
+      userId: user.id,
+      type: VerificationCodeType.PasswordReset,
+      createdAt: { gt: fiveMinAgo },
+    },
+  });
 
-//   appAssert(
-//     emailCount <= 3,
-//     TOO_MANY_REQUESTS,
-//     "Too many requests, try again later"
-//   );
+  appAssert(
+    emailCount <= 3,
+    TOO_MANY_REQUESTS,
+    "Too many requests, try again later"
+  );
 
-//   // create verification code
-//   const expiresAt = oneHourFromNow();
-//   // const verificationCode = await VerificationCodeModel.create({
-//   //   userId: user.id,
-//   //   type: VerificationCodeType.PasswordReset,
-//   //   expiresAt,
-//   // });
+  // create verification code
+  const expiresAt = oneHourFromNow();
+  // const verificationCode = await VerificationCodeModel.create({
+  //   userId: user.id,
+  //   type: VerificationCodeType.PasswordReset,
+  //   expiresAt,
+  // });
 
-//   const verificationCode = await prisma.verificationCode.create({
-//     data: {
-//       userId: user.id,
-//       type: VerificationCodeType.PasswordReset,
-//       expiresAt,
-//     },
-//   });
+  const verificationCode = await prisma.verificationCode.create({
+    data: {
+      userId: user.id.toString(),
+      type: VerificationCodeType.EmailVerification,
+      expiresAt: oneYearFromNow(),
+      createdAt: new Date(),
+    },
+  });
 
-//   // send verification email
-//   const url = `${APP_ORIGIN}/reset-password?code=${
-//     verificationCode.id
-//   }&expiresAt=${expiresAt.getTime()}`;
+  // send verification email
+  const url = `${APP_ORIGIN}/forgot-password?code=${
+    verificationCode.id
+  }&expiresAt=${expiresAt.getTime()}`;
 
-//   const { data, error } = await sendPasswordResetEmail(email, token);
+  await sendForgotPasswordEmail(email, url);
 
-//   appAssert(
-//     data?.id,
-//     INTERNAL_SERVER_ERROR,
-//     `${error?.name} - ${error?.message}`
-//   );
-
-//   // return success
-//   return {
-//     url,
-//     emailId: data.id,
-//   };
-// };
+  // return success
+  return {
+    url,
+    // emailId: data.id,
+  };
+};
 
 // export const resetPassword = async ({
 //   password,
