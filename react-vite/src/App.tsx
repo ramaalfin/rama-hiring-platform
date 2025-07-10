@@ -1,35 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// src/App.tsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from '@/redux/store';
+import { useAuth } from '@/hooks/useAuth';
+import LoginPage from '@/pages/auth/LoginPage';
+import RegisterPage from '@/pages/auth/RegisterPage';
+import DashboardPage from '@/pages/dashboard/DashboardPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Component to handle authentication check and routing
+const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Routes>
+      {/* Public routes */}
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+      />
 
-export default App
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <DashboardPage />
+        }
+      />
+
+      {/* Root redirect */}
+      <Route
+        path="/"
+        element={
+          <Navigate
+            to={isAuthenticated ? "/dashboard" : "/login"}
+            replace
+          />
+        }
+      />
+
+      {/* 404 page */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <Provider store={store}>
+      <Router>
+        <div className="App">
+          <AppRoutes />
+        </div>
+      </Router>
+    </Provider>
+  );
+};
+
+export default App;
