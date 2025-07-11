@@ -68,7 +68,7 @@ const Sessions = () => {
                             {currentSession && (
                                 <div className="w-full py-2 border-b pb-5">
                                     <SessionItem
-                                        key={currentSession._id}
+                                        key={currentSession.id}
                                         date={currentSession.createdAt}
                                         expiresAt={currentSession.expiresAt}
                                         userAgent={currentSession.userAgent}
@@ -82,12 +82,12 @@ const Sessions = () => {
                                     {otherSession.map((session) => (
                                         <li>
                                             <SessionItem
-                                                key={session._id}
+                                                key={session.id}
                                                 loading={isPending}
                                                 userAgent={session.userAgent}
                                                 date={session.createdAt}
                                                 expiresAt={session.expiresAt}
-                                                onRemove={() => handleDelete(session._id)}
+                                                onRemove={() => handleDelete(session.id)}
                                             />
                                         </li>
                                     ))}

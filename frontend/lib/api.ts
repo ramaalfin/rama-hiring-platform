@@ -26,7 +26,7 @@ type VerifyEmailType = {
 };
 
 type SessionType = {
-  _id: string;
+  id: string;
   userId: string;
   userAgent: string;
   expiresAt: string;
