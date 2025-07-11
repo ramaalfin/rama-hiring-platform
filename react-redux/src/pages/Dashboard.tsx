@@ -1,28 +1,23 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { logoutUser, getCurrentUser } from '@/reducers/authSlice';
-import { getAllSessions, deleteSession } from '@/reducers/sessionSlice';
+import { getCurrentUser, logoutUser } from '@/reducers/authSlice';
+// import { deleteSession } from '@/reducers/sessionSlice';
 import Button from '@/components/ui/Button';
-import Alert from '@/components/ui/Alert';
+// import Alert from '@/components/ui/Alert';
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth);
-  const { sessions, isLoading: sessionLoading, error: sessionError } = useAppSelector((state) => state.session);
+  // const { sessions, isLoading: sessionLoading, error: sessionError } = useAppSelector((state) => state.session);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
+    if (isAuthenticated && !user) {
+      dispatch(getCurrentUser());
     }
-
-    // Load user data and sessions
-    dispatch(getCurrentUser());
-    dispatch(getAllSessions());
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [dispatch, isAuthenticated, user]);
 
   const handleLogout = async () => {
     try {
@@ -33,19 +28,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteSession = async (sessionId: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus sesi ini?')) {
-      try {
-        await dispatch(deleteSession(sessionId)).unwrap();
-      } catch (error) {
-        console.error('Delete session failed:', error);
-      }
-    }
-  };
+  // const handleDeleteSession = async (sessionId: string) => {
+  //   if (window.confirm('Apakah Anda yakin ingin menghapus sesi ini?')) {
+  //     try {
+  //       await dispatch(deleteSession(sessionId)).unwrap();
+  //     } catch (error) {
+  //       console.error('Delete session failed:', error);
+  //     }
+  //   }
+  // };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('id-ID');
-  };
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleString('id-ID');
+  // };
 
   if (authLoading) {
     return (
@@ -87,8 +82,8 @@ const Dashboard: React.FC = () => {
                   <div>
                     <span className="text-sm font-medium text-gray-500">Status Verifikasi:</span>
                     <span className={`ml-2 px-2 py-1 text-xs rounded-full ${user.verified
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
                       }`}>
                       {user.verified ? 'Terverifikasi' : 'Belum Terverifikasi'}
                     </span>
@@ -96,8 +91,8 @@ const Dashboard: React.FC = () => {
                   <div>
                     <span className="text-sm font-medium text-gray-500">2FA:</span>
                     <span className={`ml-2 px-2 py-1 text-xs rounded-full ${user.isTwoFAEnabled
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
                       }`}>
                       {user.isTwoFAEnabled ? 'Aktif' : 'Tidak Aktif'}
                     </span>
@@ -110,7 +105,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Sessions */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          {/* <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Sesi Aktif</h2>
 
@@ -177,7 +172,7 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

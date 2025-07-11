@@ -54,11 +54,16 @@ const Login: React.FC = () => {
       // Dispatch login action
       await dispatch(loginUser(validatedData)).unwrap();
 
-    } catch (error: any) {
-      if (error.errors) {
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'errors' in error &&
+        Array.isArray((error as { errors: unknown }).errors)
+      ) {
         // Handle zod validation errors
         const errors: Partial<LoginFormData> = {};
-        error.errors.forEach((err: any) => {
+        (error as { errors: Array<{ path: [string]; message: string }> }).errors.forEach((err) => {
           errors[err.path[0] as keyof LoginFormData] = err.message;
         });
         setFieldErrors(errors);
