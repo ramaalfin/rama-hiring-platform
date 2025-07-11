@@ -46,12 +46,13 @@ export const registerController = catchErrors(async (req, res) => {
 });
 
 export const loginController = catchErrors(async (req, res) => {
-  const request = loginSchema.parse({
-    ...req.body,
+  const data = loginSchema.parse({
+    email: req.body.email,
+    password: req.body.password,
     userAgent: req.headers["user-agent"],
   });
 
-  const { accessToken, refreshToken } = await loginUser(request);
+  const { accessToken, refreshToken } = await loginUser(data);
 
   setAuthCookies({ res, accessToken, refreshToken });
   return res.status(OK).json({

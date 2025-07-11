@@ -14,15 +14,15 @@ export const api = axios.create({
 });
 
 // Request interceptor untuk menambahkan user-agent
-api.interceptors.request.use(
-  (config) => {
-    config.headers["User-Agent"] = navigator.userAgent;
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// api.interceptors.request.use(
+//   (config) => {
+//     config.headers["User-Agent"] = navigator.userAgent;
+//     return config;
+//   },
+//   (error) => {
+//     return Promise.reject(error);
+//   }
+// );
 
 // Response interceptor untuk handle error
 api.interceptors.response.use(

@@ -31,7 +31,7 @@ import {
 } from "../utils/emailTemplate";
 import { hashValue } from "../utils/bcrypt";
 import prisma from "../prisma/client";
-import { comparePassword } from "../utils/password";
+import bcrypt from "bcryptjs";
 
 type ResetPasswordData = {
   password: string;
@@ -111,7 +111,7 @@ export const loginUser = async ({
   });
   appAssert(user, NOT_FOUND, "User not found");
 
-  const isPasswordValid = comparePassword(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
   appAssert(isPasswordValid, NOT_FOUND, "Invalid password");
 
   const userId = user.id;
