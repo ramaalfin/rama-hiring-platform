@@ -46,6 +46,12 @@ export type CreateAccountData = {
   userAgent?: string;
 };
 
+type LoginParams = {
+  email: string;
+  password: string;
+  userAgent?: string;
+};
+
 export const createAccount = async (data: CreateAccountData) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: data.email },
@@ -92,12 +98,6 @@ export const createAccount = async (data: CreateAccountData) => {
   });
 
   return { user: user, refreshToken, accessToken };
-};
-
-type LoginParams = {
-  email: string;
-  password: string;
-  userAgent?: string;
 };
 
 export const loginUser = async ({
