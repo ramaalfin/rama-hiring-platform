@@ -19,6 +19,7 @@ model User {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   sessions       Session[]
+  blogs          Blog[]
   verifications  VerificationCode[]
 }
 
@@ -39,4 +40,14 @@ model VerificationCode {
   type      String
   expiresAt DateTime
   createdAt DateTime
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
