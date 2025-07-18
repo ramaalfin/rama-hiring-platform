@@ -1,18 +1,49 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getBlogByIdQueryFn, getBlogsQueryFn } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createBlogMutationFn,
+  deleteBlogMutationFn,
+  getBlogsQueryFn,
+  updateBlogMutationFn,
+} from "@/lib/api";
 
 export function useBlogs() {
   return useQuery({
     queryKey: ["blogs"],
-    queryFn: getBlogsQueryFn,
+    queryFn: () => getBlogsQueryFn(),
   });
 }
 
-export function useBlogById(id: string) {
-  return useQuery({
-    queryKey: ["blog", id],
-    queryFn: () => getBlogByIdQueryFn(id),
+export function useCreateBlog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createBlogMutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+    },
+  });
+}
+
+export function useUpdateBlog() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateBlogMutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+    },
+  });
+}
+
+export function useDeleteBlog(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteBlogMutationFn(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+    },
   });
 }

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import API from "./axios-client";
 
 type LoginType = {
@@ -89,11 +90,29 @@ export const getBlogsQueryFn = async () => {
   const response = await API.get("/blogs");
   return response.data;
 };
+// export const getBlogByIdQueryFn = async (id: string) => {
+//   const response = await API.get(`/blogs/${id}`);
+//   return response.data;
+// };
 
-export const getBlogByIdQueryFn = async (id: string) => {
-  const response = await API.get(`/blogs/${id}`);
-  return response.data;
-};
+export async function getBlogById(id: string, token: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/blogs/${id}`,
+    {
+      credentials: "include",
+      headers: {
+        Cookie: token ? `accessToken=${token}` : "",
+      },
+      next: { revalidate: 0 },
+    }
+  );
+
+  if (res.status === 401) throw new Error("UNAUTHORIZED");
+  if (!res.ok) throw new Error("Failed to fetch blog");
+
+  const { data } = await res.json();
+  return data;
+}
 
 export const createBlogMutationFn = async (data: {
   title: string;
@@ -103,13 +122,16 @@ export const createBlogMutationFn = async (data: {
   return response.data;
 };
 
-export const updateBlogMutationFn = async (
-  id: string,
+export const updateBlogMutationFn = async ({
+  id,
+  data,
+}: {
+  id: string;
   data: {
     title: string;
     content: string;
-  }
-) => {
+  };
+}) => {
   const response = await API.put(`/blogs/${id}`, data);
   return response.data;
 };

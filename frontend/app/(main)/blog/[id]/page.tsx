@@ -1,35 +1,46 @@
-"use client";
+import { cookies } from "next/headers";
+import { getBlogById } from "@/lib/api";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 
-import { useBlogById, useBlogs } from "@/hooks/use-blog";
-import { useParams } from "next/navigation";
+type Props = {
+  params: { id: string };
+};
 
-const DetailBlogPage = () => {
-  const params = useParams();
-  const blogId = params.id as string;
-  const { data: blog, isLoading, error } = useBlogById(blogId);
+export default async function BlogDetailPage({ params }: Props) {
+  const token = cookies().get("accessToken")?.value;
 
-  console.log("Blog Data:", blog);
+  if (!token) {
+    redirect("/");
+  }
 
+  try {
+    const blog = await getBlogById(params.id, token || "");
 
-  if (isLoading) return (
-    // place a loading component on the center of the page
-    <div className="flex items-center justify-center h-screen">
-      <div>Loading...</div>
-    </div>
-  )
-
-  return (
-    <div className="p-6">
-      {error && <div className="text-red-500">Error: {error.message}</div>}
-      {blog && (
+    return (
+      <div className="p-6">
+        <nav className="mb-4">
+          <ol className="list-reset flex text-gray-700">
+            <li>
+              <Link href="/blog" className="text-blue-600 hover:underline">
+                Blogs
+              </Link>
+            </li>
+            <li className="mx-2">/</li>
+            <li className="text-gray-500">{blog.title}</li>
+          </ol>
+        </nav>
         <div className="">
-          <h4 className="text-lg font-semibold">{blog.data.title}</h4>
-          <p className="text-sm text-gray-500">By {blog.data.author.fullName}</p>
-          <p className="mt-8">{blog.data.content}</p>
+          <h4 className="text-lg font-semibold">{blog.title}</h4>
+          <p className="text-sm text-gray-500">By {blog.author.fullName}</p>
+          <p className="mt-8">{blog.content}</p>
         </div>
-      )}
-    </div>
-  )
+      </div>
+    );
+  } catch (error: any) {
+    if (error.message === "UNAUTHORIZED") {
+      redirect("/");
+    }
+    throw error;
+  }
 }
-
-export default DetailBlogPage;
