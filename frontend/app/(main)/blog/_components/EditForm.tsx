@@ -16,10 +16,11 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { blogFormSchema, BlogFormValues } from "@/lib/schema";
-import { useUpdateBlog } from "@/hooks/use-blog";
+import { useBlogs, useUpdateBlog } from "@/hooks/use-blog";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { revalidateTag } from "next/cache";
+import { Controller } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EditFormProps {
   id: string;
@@ -27,11 +28,14 @@ interface EditFormProps {
 }
 
 export default function EditForm({ id, defaultValues }: EditFormProps) {
-  const { mutate: updateBlog, isPending } = useUpdateBlog();
   const [open, setOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  const { mutate: updateBlog, isPending } = useUpdateBlog();
+
   const {
-    register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -46,23 +50,28 @@ export default function EditForm({ id, defaultValues }: EditFormProps) {
       {
         onSuccess: () => {
           toast({
-            title: "Blog created successfully",
-            description: "Your blog has been created.",
+            title: "Blog updated successfully",
+            description: "Your blog has been updated.",
             variant: "default",
-          })
-          reset();
+          });
+          queryClient.invalidateQueries({ queryKey: ["blogs"] });
+          reset(values);
           setOpen(false);
-          revalidateTag("blogs");
         },
         onError: () => {
           toast({
-            title: "Error creating blog",
-            description: "Failed to create blog",
+            title: "Error updating blog",
+            description: "Failed to update blog",
             variant: "destructive",
           });
         },
       });
   };
+
+  const handleCancel = () => {
+    reset();
+    setOpen(false);
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -81,19 +90,32 @@ export default function EditForm({ id, defaultValues }: EditFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" {...register("title")} />
+            <Controller
+              name="title"
+              control={control}
+              rules={{ required: "Title is required" }}
+              render={({ field }) => (
+                <Input id="title" {...field} />
+              )}
+            />
             {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="content">Content</Label>
-            <Input id="content" {...register("content")} />
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <Input id="content" {...field} />
+              )}
+            />
             {errors.content && <p className="text-sm text-red-500">{errors.content.message}</p>}
           </div>
 
           <DialogFooter className="mt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
             </DialogClose>
             <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save"}

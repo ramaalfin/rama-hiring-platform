@@ -23,6 +23,10 @@ export function useCreateBlog() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blogs"] });
     },
+    onError: () => {
+      // Handle error if needed
+      console.error("Error creating blog");
+    },
   });
 }
 

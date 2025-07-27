@@ -1,15 +1,9 @@
-"use client";
-
 import Link from "next/link";
 import { useBlogs } from "@/hooks/use-blog";
-import DeleteModal from "./DeleteModal";
 import EditForm from "./EditForm";
 
-export default function BlogList() {
-  const {
-    data: blogs,
-    isLoading,
-  } = useBlogs();
+export default function BlogList({ onDelete }: { onDelete: (id: string) => void }) {
+  const { data: blogs, isLoading } = useBlogs();
 
   if (isLoading) return <p>Loading...</p>;
 
@@ -23,7 +17,12 @@ export default function BlogList() {
             <Link href={`/blog/${blog.id}`} className="text-blue-600" replace>
               View
             </Link>
-            <DeleteModal id={blog.id} />
+            <p
+              className="cursor-pointer text-red-500"
+              onClick={() => onDelete(blog.id)}
+            >
+              Delete
+            </p>
             <EditForm
               id={blog.id}
               defaultValues={{

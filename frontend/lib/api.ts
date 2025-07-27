@@ -118,8 +118,12 @@ export const createBlogMutationFn = async (data: {
   title: string;
   content: string;
 }) => {
-  const response = await API.post("/blogs", data);
-  return response.data;
+  try {
+    const response = await API.post("/blogs", data);
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error;
+  }
 };
 
 export const updateBlogMutationFn = async ({
