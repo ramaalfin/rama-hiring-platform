@@ -25,7 +25,8 @@ export const getAccessTokenCookieOptions = (): CookieOptions => ({
 export const getRefreshTokenCookieOptions = (): CookieOptions => ({
   ...defaults,
   expires: thirtyDaysFromNow(),
-  path: REFRESH_PATH,
+  // path: REFRESH_PATH,
+  path: "/",
 });
 
 export const setAuthCookies = ({ res, accessToken, refreshToken }: Params) => {
@@ -34,7 +35,6 @@ export const setAuthCookies = ({ res, accessToken, refreshToken }: Params) => {
 };
 
 export const clearAuthCookies = (res: Response) => {
-  res
-    .clearCookie("accessToken")
-    .clearCookie("refreshToken", { path: REFRESH_PATH });
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
 };
