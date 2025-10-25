@@ -1,31 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { registerUser, clearError } from '@/reducers/authSlice';
-import { registerSchema } from '@/schemas/auth.schema';
-import type { RegisterFormData } from '@/schemas/auth.schema';
-import AuthForm from '@/components/auth/AuthForm';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Alert from '@/components/ui/Alert';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { registerUser, clearError } from "@/reducers/authSlice";
+import { registerSchema } from "@/schemas/auth.schema";
+import type { RegisterFormData } from "@/schemas/auth.schema";
+import AuthForm from "@/components/auth/AuthForm";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
 
 const Register: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
 
   const [formData, setFormData] = useState<RegisterFormData>({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState<Partial<RegisterFormData>>({});
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -37,11 +39,11 @@ const Register: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear field error when user starts typing
     if (fieldErrors[name as keyof RegisterFormData]) {
-      setFieldErrors(prev => ({ ...prev, [name]: undefined }));
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -55,7 +57,6 @@ const Register: React.FC = () => {
 
       // Dispatch register action
       await dispatch(registerUser(validatedData)).unwrap();
-
     } catch (error: any) {
       if (error.errors) {
         // Handle zod validation errors
@@ -120,18 +121,17 @@ const Register: React.FC = () => {
         required
       />
 
-      <Button
-        type="submit"
-        isLoading={isLoading}
-        className="w-full"
-      >
-        {isLoading ? 'Mendaftar...' : 'Daftar'}
+      <Button type="submit" isLoading={isLoading} className="w-full">
+        {isLoading ? "Mendaftar..." : "Daftar"}
       </Button>
 
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Sudah punya akun?{' '}
-          <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+          Sudah punya akun?{" "}
+          <Link
+            to="/login"
+            className="text-blue-600 hover:text-blue-500 font-medium"
+          >
             Masuk sekarang
           </Link>
         </p>

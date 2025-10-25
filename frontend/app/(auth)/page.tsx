@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 export default function Login() {
   const router = useRouter();
   const { mutate, isPending } = useMutation({
-    mutationFn: loginMutationFn
+    mutationFn: loginMutationFn,
   });
 
   const formSchema = z.object({
@@ -53,8 +53,8 @@ export default function Login() {
           title: "Error",
           description: error.message,
           variant: "destructive",
-        })
-      }
+        });
+      },
     });
   };
 
@@ -102,7 +102,11 @@ export default function Login() {
                       Password
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="••••••••••••" {...field} />
+                      <Input
+                        placeholder="••••••••••••"
+                        {...field}
+                        type="password"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

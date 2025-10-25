@@ -1,29 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { loginUser, clearError } from '@/reducers/authSlice';
-import { loginSchema } from '@/schemas/auth.schema';
-import type { LoginFormData } from '@/schemas/auth.schema';
-import AuthForm from '@/components/auth/AuthForm';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Alert from '@/components/ui/Alert';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { loginUser, clearError } from "@/reducers/authSlice";
+import { loginSchema } from "@/schemas/auth.schema";
+import type { LoginFormData } from "@/schemas/auth.schema";
+import AuthForm from "@/components/auth/AuthForm";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import Alert from "@/components/ui/Alert";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
 
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState<Partial<LoginFormData>>({});
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
@@ -35,11 +37,11 @@ const Login: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Clear field error when user starts typing
     if (fieldErrors[name as keyof LoginFormData]) {
-      setFieldErrors(prev => ({ ...prev, [name]: undefined }));
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
@@ -53,17 +55,18 @@ const Login: React.FC = () => {
 
       // Dispatch login action
       await dispatch(loginUser(validatedData)).unwrap();
-
     } catch (error: unknown) {
       if (
-        typeof error === 'object' &&
+        typeof error === "object" &&
         error !== null &&
-        'errors' in error &&
+        "errors" in error &&
         Array.isArray((error as { errors: unknown }).errors)
       ) {
         // Handle zod validation errors
         const errors: Partial<LoginFormData> = {};
-        (error as { errors: Array<{ path: [string]; message: string }> }).errors.forEach((err) => {
+        (
+          error as { errors: Array<{ path: [string]; message: string }> }
+        ).errors.forEach((err) => {
           errors[err.path[0] as keyof LoginFormData] = err.message;
         });
         setFieldErrors(errors);
@@ -101,18 +104,17 @@ const Login: React.FC = () => {
         required
       />
 
-      <Button
-        type="submit"
-        isLoading={isLoading}
-        className="w-full"
-      >
-        {isLoading ? 'Masuk...' : 'Masuk'}
+      <Button type="submit" isLoading={isLoading} className="w-full">
+        {isLoading ? "Masuk..." : "Masuk"}
       </Button>
 
       <div className="text-center">
         <p className="text-sm text-gray-600">
-          Belum punya akun?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+          Belum punya akun?{" "}
+          <Link
+            to="/register"
+            className="text-blue-600 hover:text-blue-500 font-medium"
+          >
             Daftar sekarang
           </Link>
         </p>

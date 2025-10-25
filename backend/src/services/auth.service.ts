@@ -267,14 +267,14 @@ export const forgotPasswordService = async (email: string) => {
   const verificationCode = await prisma.verificationCode.create({
     data: {
       userId: user.id.toString(),
-      type: VerificationCodeType.EmailVerification,
+      type: VerificationCodeType.PasswordReset,
       expiresAt: oneYearFromNow(),
       createdAt: new Date(),
     },
   });
 
   // send verification email
-  const url = `${APP_ORIGIN}/forgot-password?code=${verificationCode.id
+  const url = `${APP_ORIGIN}/reset-password?code=${verificationCode.id
     }&expiresAt=${expiresAt.getTime()}`;
 
   await sendForgotPasswordEmail(email, url);
@@ -286,50 +286,54 @@ export const forgotPasswordService = async (email: string) => {
   };
 };
 
-// export const resetPassword = async ({
-//   password,
-//   verificationCode,
-// }: ResetPasswordData) => {
-//   // get verification code
-//   // const validCode = await VerificationCodeModel.findOne({
-//   //   id: verificationCode,
-//   //   type: VerificationCodeType.PasswordReset,
-//   //   expiresAt: { $gt: new Date() },
-//   // });
+export const resetPassword = async ({
+  password,
+  verificationCode,
+}: ResetPasswordData) => {
+  // get verification code
+  // const validCode = await VerificationCodeModel.findOne({
+  //   id: verificationCode,
+  //   type: VerificationCodeType.PasswordReset,
+  //   expiresAt: { $gt: new Date() },
+  // });
 
-//   const validCode = await prisma.verificationCode.findUnique({
-//     where: {
-//       id: verificationCode,
-//       type: VerificationCodeType.PasswordReset,
-//       expiresAt: { gt: new Date() },
-//     },
-//   });
+  const validCode = await prisma.verificationCode.findUnique({
+    where: {
+      id: verificationCode,
+      type: VerificationCodeType.PasswordReset,
+      expiresAt: { gt: new Date() },
+    },
+  });
 
-//   appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
+  console.log("validCode", validCode);
 
-//   // update the user password
-//   // const updateUser = await UserModel.findByIdAndUpdate(validCode.userId, {
-//   //   password: await hashValue(password),
-//   // });
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
 
-//   const updateUser = await prisma.user.update({
-//     where: { id: validCode.userId },
-//     data: { password: await hashValue(password) },
-//   });
+  // update the user password
+  // const updateUser = await UserModel.findByIdAndUpdate(validCode.userId, {
+  //   password: await hashValue(password),
+  // });
 
-//   appAssert(updateUser, INTERNAL_SERVER_ERROR, "Failed to reset password");
+  const updateUser = await prisma.user.update({
+    where: { id: validCode.userId },
+    data: { password: await hashValue(password) },
+  });
 
-//   // delete verif code
-//   await validCode.deleteOne();
+  appAssert(updateUser, INTERNAL_SERVER_ERROR, "Failed to reset password");
 
-//   // delete all user sessions
-//   // await SessionModel.deleteMany({ userId: updateUser.id });
+  // delete verif code
+  await prisma.verificationCode.delete({
+    where: { id: validCode.id },
+  });
 
-//   await prisma.session.deleteMany({
-//     where: { userId: updateUser.id },
-//   });
 
-//   return {
-//     user: updateUser.omitPassword(),
-//   };
-// };
+  // delete all user sessions
+  // await SessionModel.deleteMany({ userId: updateUser.id });
+
+  await prisma.session.deleteMany({
+    where: { userId: updateUser.id },
+  });
+
+  const { password: _, ...userWithoutPassword } = updateUser;
+  return { user: userWithoutPassword };
+};

@@ -4,9 +4,8 @@ import {
   loginUser,
   refreshUserAccessToken,
   verifyEmail,
-  // resetPassword,
   forgotPasswordService,
-  // verifyEmail,
+  resetPassword,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
@@ -126,14 +125,14 @@ export const forgotPasswordController = catchErrors(async (req, res) => {
   });
 });
 
-// export const resetPasswordController = catchErrors(async (req, res) => {
-//   const request = resetPasswordSchema.parse(req.body);
+export const resetPasswordController = catchErrors(async (req, res) => {
+  const request = resetPasswordSchema.parse(req.body);
 
-//   // call service
-//   await resetPassword(request);
+  // call service
+  await resetPassword(request);
 
-//   clearAuthCookies(res);
-//   return res.status(OK).json({
-//     message: "Password reset successful",
-//   });
-// });
+  clearAuthCookies(res);
+  return res.status(OK).json({
+    message: "Password reset successful",
+  });
+});
