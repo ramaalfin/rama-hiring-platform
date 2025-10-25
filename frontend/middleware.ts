@@ -3,6 +3,9 @@ import { NextResponse, NextRequest } from "next/server";
 const protectedRoutes = ["/home", "/sessions"];
 const publicRoutes = [
   "/",
+  "/signin",
+  "/magic-login",
+  "/magic-login/verify",
   "/signup",
   "/confirm-account",
   "/forgot-password",

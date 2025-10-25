@@ -6,6 +6,8 @@ import {
   verifyEmail,
   forgotPasswordService,
   resetPassword,
+  sendMagicLoginService,
+  verifyMagicLoginService,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
@@ -19,6 +21,7 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  verificationCodeSchema,
   verificationEmailSchema,
 } from "../schemas/auth.schemas";
 import { verifyToken } from "../utils/jwt";
@@ -134,5 +137,27 @@ export const resetPasswordController = catchErrors(async (req, res) => {
   clearAuthCookies(res);
   return res.status(OK).json({
     message: "Password reset successful",
+  });
+});
+
+export const sendMagicLoginController = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
+
+  await sendMagicLoginService(email);
+
+  return res.status(OK).json({ message: "Check your email for login link" });
+});
+
+export const verifyMagicLoginController = catchErrors(async (req, res) => {
+  const code = verificationCodeSchema.parse(req.query.code);
+  const tokens = await verifyMagicLoginService(code);
+
+  // Set cookie di sini
+  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
+
+  return res.status(200).json({
+    message: "Magic login successful",
+    user: tokens.user,
   });
 });

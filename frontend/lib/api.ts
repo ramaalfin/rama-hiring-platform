@@ -54,6 +54,21 @@ export const loginMutationFn = async (data: LoginType) => {
   await API.post("/auth/login", data);
 };
 
+export const magicLoginMutationFn = async (data: { email: string }) => {
+  await API.post("/auth/magic-login", data);
+}
+
+export const verifyMagicLoginMutationFn = async ({ code }: { code: string }) => {
+  const response = await API.get("/auth/magic-login/verify", {
+    params: { code },
+    headers: {
+      // flag untuk memberitahu interceptor agar tidak mencoba refresh auth
+      "x-skip-refresh": "1",
+    },
+  });
+  return response.data;
+};
+
 export const registerMutationFn = async (data: RegisterType) => {
   await API.post("/auth/register", data);
 };

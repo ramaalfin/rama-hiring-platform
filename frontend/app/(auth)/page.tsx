@@ -1,9 +1,14 @@
 "use client";
+
+import { useSearchParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { ArrowRight, Loader } from "lucide-react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { KeyRound, Loader } from "lucide-react";
 import Link from "next/link";
+
+import { magicLoginMutationFn } from "@/lib/api";
 import {
   Form,
   FormControl,
@@ -14,157 +19,97 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Logo from "@/components/logo";
-import { useMutation } from "@tanstack/react-query";
-import { loginMutationFn } from "@/lib/api";
-import { toast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 
 export default function Login() {
   const router = useRouter();
-  const { mutate, isPending } = useMutation({
-    mutationFn: loginMutationFn,
-  });
+  const searchParams = useSearchParams();
+  const errorMessage = searchParams.get("error");
 
   const formSchema = z.object({
-    email: z.string().trim().email().min(1, {
-      message: "Email is required",
-    }),
-    password: z.string().trim().min(1, {
-      message: "Password is required",
-    }),
+    email: z.string().email("Email tidak valid").min(1, "Email wajib diisi"),
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
+    defaultValues: { email: "" },
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: magicLoginMutationFn,
+    onSuccess: () => {
+      router.replace("/check-email");
+    },
+    onError: (error: any) => {
+      form.setError("email", {
+        type: "manual",
+        message: error.response?.data?.message || "Email tidak ditemukan.",
+      });
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    mutate(values, {
-      onSuccess: () => {
-        router.replace("/home");
-      },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      },
-    });
+    mutate(values);
   };
 
+  console.log("error", errorMessage);
+
   return (
-    <main className="w-full min-h-[590px] h-auto max-w-full pt-10">
-      <div className="w-full h-full p-5 rounded-md">
-        <Logo />
+    <main className="w-full h-full p-8 rounded-md" key={errorMessage}>
+      <h1 className="text-xl font-bold mb-2 text-center sm:text-left">
+        Masuk ke Rakamin
+      </h1>
 
-        <h1 className="text-xl tracking-[-0.16px] dark:text-[#fcfdffef] font-bold mb-1.5 mt-8 text-center sm:text-left">
-          Masuk ke Rakamin
-        </h1>
-        <p className="mb-8 text-center sm:text-left text-base dark:text-[#f1f7feb5] font-normal">
-          Don't have an account?{" "}
-          <Link className="text-primary" href="/signup">
-            Sign up
-          </Link>
-          .
-        </p>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="mb-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                      Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="subscribeto@channel.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="mb-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                      Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="••••••••••••"
-                        {...field}
-                        type="password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="mb-4 flex w-full items-center justify-end">
-              <Link
-                className="text-sm dark:text-white"
-                href={`/forgot-password?email=${form.getValues("email")}`}
-              >
-                Forgot your password?
-              </Link>
-            </div>
-            <Button
-              className="w-full text-[15px] h-[40px] text-white font-semibold"
-              disabled={isPending}
-              type="submit"
-            >
-              {isPending && <Loader className="animate-spin" />}
-              Sign in
-              <ArrowRight />
+      <p className="mb-4 text-center sm:text-left text-base">
+        Belum punya akun?{" "}
+        <Link className="text-primary" href="/signup-with-link">
+          Daftar menggunakan email
+        </Link>
+      </p>
+
+      {/* tampilkan pesan error dari query param */}
+      {errorMessage && (
+        <div className="mb-4 rounded-md bg-red-100 text-red-800 p-3 text-sm">
+          {decodeURIComponent(errorMessage)}
+        </div>
+      )}
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="mb-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alamat Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Button className="w-full" disabled={isPending} type="submit">
+            {isPending && <Loader className="animate-spin mr-2" size={16} />}
+            Kirim Link
+          </Button>
+
+          <div className="flex items-center justify-center mt-6 mb-4">
+            <div className="w-full border border-neutral-60" />
+            <span className="mx-3 text-sm text-neutral-60">atau</span>
+            <div className="w-full border border-neutral-60" />
+          </div>
+
+          <Link href="/signin" className="flex items-center gap-2">
+            <Button variant="outline" className="w-full">
+              <KeyRound className="w-4" />
+              Masuk dengan kata sandi
             </Button>
-
-            <div className="mb-6 mt-6 flex items-center justify-center">
-              <div
-                aria-hidden="true"
-                className="h-px w-full bg-[#eee] dark:bg-[#d6ebfd30]"
-                data-orientation="horizontal"
-                role="separator"
-              ></div>
-              <span className="mx-4 text-xs dark:text-[#f1f7feb5] font-normal">
-                OR
-              </span>
-              <div
-                aria-hidden="true"
-                className="h-px w-full bg-[#eee] dark:bg-[#d6ebfd30]"
-                data-orientation="horizontal"
-                role="separator"
-              ></div>
-            </div>
-          </form>
-        </Form>
-        <Button variant="outline" className="w-full h-[40px]">
-          Email magic link
-        </Button>
-        <p className="text-xs dark:text-slate- font-normal mt-7">
-          By signing in, you agree to our{" "}
-          <a className="text-primary hover:underline" href="#">
-            Terms of Service
-          </a>{" "}
-          and{" "}
-          <a className="text-primary hover:underline" href="#">
-            Privacy Policy
-          </a>
-          .
-        </p>
-      </div>
+          </Link>
+        </form>
+      </Form>
     </main>
   );
 }

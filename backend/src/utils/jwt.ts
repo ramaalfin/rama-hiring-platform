@@ -3,6 +3,7 @@ import { SignOptions, VerifyOptions } from "jsonwebtoken";
 // import { UserDocument } from "../model/user.model";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../constants/env";
 import jwt from "jsonwebtoken";
+import prisma from "../prisma/client";
 
 export type RefreshTokenPayload = {
   sessionId: string;
@@ -54,4 +55,20 @@ export const verifyToken = <TPayload extends object = AccessTokenPayload>(
       error: error.message,
     };
   }
+};
+
+export const generateUserTokens = async (userId: string) => {
+  const session = await prisma.session.create({
+    data: { userId, userAgent: "magic_link" },
+  });
+
+  const sessionInfo = { sessionId: session.id };
+
+  const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId,
+  });
+
+  return { accessToken, refreshToken };
 };

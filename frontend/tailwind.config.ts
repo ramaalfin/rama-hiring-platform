@@ -40,6 +40,13 @@ const config: Config = {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        neutral: {
+          "30": "hsl(var(--neutral-30))",
+          "40": "hsl(var(--neutral-40))",
+          "60": "hsl(var(--neutral-60))",
+          "90": "hsl(var(--neutral-90))",
+          "1000": "hsl(var(--neutral-1000))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

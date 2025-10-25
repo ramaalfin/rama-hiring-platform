@@ -90,3 +90,16 @@ export const sendForgotPasswordEmail = async (
     `,
   });
 };
+
+export const sendMagicLoginEmail = async (email: string, url: string) => {
+  await transporter.sendMail({
+    from: `"Your App" <${GMAIL_USER}>`,
+    to: email,
+    subject: "Your Magic Login Link",
+    html: `
+      <p>Click the link below to log in to your account:</p>
+      <a href="${url}">${url}</a>
+      <p>This link will expire in 5 minutes.</p>
+    `,
+  });
+};

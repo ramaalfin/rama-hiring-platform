@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader, Mail, MailCheckIcon } from "lucide-react";
+import { KeyRound, Loader, Mail, MailCheckIcon } from "lucide-react";
 import { registerMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -87,23 +87,6 @@ export default function SignUp() {
               <div className="mb-4">
                 <FormField
                   control={form.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                        Name
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Techwithemma" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="mb-4">
-                <FormField
-                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -118,48 +101,7 @@ export default function SignUp() {
                   )}
                 />
               </div>
-              <div className="mb-4">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-neutral-90">
-                        Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••••••"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="mb-4">
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                        Confirm Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••••••"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+
               <Button
                 className="w-full text-[15px] h-[40px] text-neutral-90 font-semibold bg-secondary"
                 disabled={isPending}
@@ -186,13 +128,13 @@ export default function SignUp() {
               </div>
             </form>
           </Form>
-          <Link className="flex items-center gap-2" href="/signup-with-link">
+          <Link className="flex items-center gap-2" href="/signup">
             <Button
               variant="outline"
               className="w-full h-[40px] text-neutral-1000"
             >
-              <Mail className="!w-3 font-bold" />
-              Kirim link melalui email
+              <KeyRound className="!w-3 font-bold" />
+              Masuk dengan kata sandi
             </Button>
           </Link>
         </>

@@ -11,24 +11,35 @@ const API = axios.create(options);
 export const APIRefresh = axios.create(options);
 APIRefresh.interceptors.response.use((response) => response);
 
+// Interceptor: hanya jalankan logic refresh untuk 401 jika
+// request TIDAK memiliki header 'x-skip-refresh'
 API.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
+
   async (error) => {
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+
     const { data, status } = error.response;
 
-    if (status === 401) {
+    // Jika request punya header x-skip-refresh, jangan lakukan retry/refresh
+    const skipRefresh =
+      error.config && error.config.headers && error.config.headers["x-skip-refresh"];
+
+    if (status === 401 && !skipRefresh) {
       try {
         await APIRefresh.get("/auth/refresh");
+        // ulangi request awal (perhatikan: APIRefresh tidak memiliki interceptor retry)
         return APIRefresh(error.config);
-      } catch (error) {
+      } catch (err) {
+        // jika gagal refresh, arahkan ke root (atau halaman login)
         window.location.href = "/";
+        return Promise.reject(err);
       }
     }
-    return Promise.reject({
-      ...data,
-    });
+
+    return Promise.reject(error);
   }
 );
 
