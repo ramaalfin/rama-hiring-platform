@@ -32,6 +32,7 @@ import {
 import { hashValue } from "../utils/bcrypt";
 import prisma from "../prisma/client";
 import bcrypt from "bcryptjs";
+import AppError from "../utils/AppError";
 
 type ResetPasswordData = {
   password: string;
@@ -77,7 +78,12 @@ export const createAccount = async (data: CreateAccountData) => {
 
   const verifyCode = verificationCode.id;
 
-  await sendVerificationEmail(user.email, verifyCode);
+  try {
+    await sendVerificationEmail(user.email, verifyCode);
+  } catch (err) {
+    console.error("❌ Failed to send verification email:", err);
+    throw new AppError(500, "Failed to send verification email");
+  }
 
   const session = await prisma.session.create({
     data: {
@@ -268,9 +274,8 @@ export const forgotPasswordService = async (email: string) => {
   });
 
   // send verification email
-  const url = `${APP_ORIGIN}/forgot-password?code=${
-    verificationCode.id
-  }&expiresAt=${expiresAt.getTime()}`;
+  const url = `${APP_ORIGIN}/forgot-password?code=${verificationCode.id
+    }&expiresAt=${expiresAt.getTime()}`;
 
   await sendForgotPasswordEmail(email, url);
 

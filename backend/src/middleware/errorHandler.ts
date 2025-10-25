@@ -36,6 +36,9 @@ const errorHandler: ErrorRequestHandler = (error, req, res, next): any => {
     return handleAppError(res, error);
   }
 
+  console.log("internal", error);
+
+
   return res.status(INTERNAL_SERVER_ERROR).send("Internal Server Error");
 };
 

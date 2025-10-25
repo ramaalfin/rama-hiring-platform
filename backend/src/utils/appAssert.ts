@@ -17,6 +17,10 @@ const appAssert: AppAssert = (
   httpStatusCode,
   message,
   appErrorCode
-) => assert(condition, new AppError(httpStatusCode, message, appErrorCode));
+) => {
+  if (!condition) {
+    throw new AppError(httpStatusCode, message, appErrorCode);
+  }
+}
 
 export default appAssert;
