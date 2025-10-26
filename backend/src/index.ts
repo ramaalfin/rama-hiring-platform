@@ -9,7 +9,6 @@ import authRoutes from "./routes/auth.route";
 import authenticate from "./middleware/authenticate";
 import userRoutes from "./routes/user.route";
 import sessionRoutes from "./routes/session.route";
-import blogRoutes from "./routes/blog.routes";
 
 const app = express();
 
@@ -30,7 +29,6 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", authenticate, userRoutes);
 app.use("/api/v1/sessions", authenticate, sessionRoutes);
-app.use("/api/v1/blogs", authenticate, blogRoutes);
 
 app.use(errorHandler);
 
