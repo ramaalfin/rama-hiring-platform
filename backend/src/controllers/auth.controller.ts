@@ -8,6 +8,8 @@ import {
   resetPassword,
   sendMagicLoginService,
   verifyMagicLoginService,
+  sendMagicRegisterService,
+  verifyMagicRegisterService,
 } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
@@ -142,9 +144,7 @@ export const resetPasswordController = catchErrors(async (req, res) => {
 
 export const sendMagicLoginController = catchErrors(async (req, res) => {
   const email = emailSchema.parse(req.body.email);
-
   await sendMagicLoginService(email);
-
   return res.status(OK).json({ message: "Check your email for login link" });
 });
 
@@ -158,6 +158,25 @@ export const verifyMagicLoginController = catchErrors(async (req, res) => {
 
   return res.status(200).json({
     message: "Magic login successful",
+    user: tokens.user,
+  });
+});
+
+export const sendMagicRegisterController = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
+  const result = await sendMagicRegisterService(email);
+  return res.status(OK).json({ message: result.message });
+});
+
+export const verifyMagicRegisterController = catchErrors(async (req, res) => {
+  const code = verificationCodeSchema.parse(req.query.code);
+  const tokens = await verifyMagicRegisterService(code);
+
+  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
+
+  return res.status(200).json({
+    message: "Magic registration successful",
     user: tokens.user,
   });
 });

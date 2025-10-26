@@ -10,6 +10,7 @@ const publicRoutes = [
   "/confirm-account",
   "/forgot-password",
   "/reset-password",
+  "/check-email",
 ];
 
 export default async function middleware(req: NextRequest) {

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export default function Login() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function Login() {
     onError: (error: any) => {
       form.setError("email", {
         type: "manual",
-        message: error.response?.data?.message || "Email tidak ditemukan.",
+        message: getErrorMessage(error) || "Email tidak ditemukan.",
       });
     },
   });
@@ -50,8 +51,6 @@ export default function Login() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     mutate(values);
   };
-
-  console.log("error", errorMessage);
 
   return (
     <main className="w-full h-full p-8 rounded-md" key={errorMessage}>
@@ -91,14 +90,18 @@ export default function Login() {
             />
           </div>
 
-          <Button className="w-full" disabled={isPending} type="submit">
+          <Button
+            className="w-full text-[15px] h-[40px] text-neutral-90 font-semibold bg-secondary hover:bg-yellow-500"
+            disabled={isPending}
+            type="submit"
+          >
             {isPending && <Loader className="animate-spin mr-2" size={16} />}
             Kirim Link
           </Button>
 
           <div className="flex items-center justify-center mt-6 mb-4">
             <div className="w-full border border-neutral-60" />
-            <span className="mx-3 text-sm text-neutral-60">atau</span>
+            <span className="mx-3 text-sm text-neutral-60">or</span>
             <div className="w-full border border-neutral-60" />
           </div>
 

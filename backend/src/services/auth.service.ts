@@ -20,6 +20,7 @@ import {
   sendVerificationEmail,
   sendForgotPasswordEmail,
   sendMagicLoginEmail,
+  sendMagicRegisterEmail,
 } from "../utils/sendMail";
 import { hashValue } from "../utils/bcrypt";
 import prisma from "../prisma/client";
@@ -321,5 +322,64 @@ export const verifyMagicLoginService = async (code: string) => {
   const accessToken = signToken({ ...sessionInfo, userId: user.id });
 
   const { password: _, ...userWithoutPassword } = user;
+  return { accessToken, refreshToken, user: userWithoutPassword };
+};
+
+export const sendMagicRegisterService = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+  appAssert(!user, CONFLICT, "Email already registered");
+
+  const newUser = await prisma.user.create({
+    data: {
+      email,
+      fullName: "",
+      verified: false,
+      password: ""
+    },
+  });
+
+  const expiresAt = fiveMinutesFromNow();
+  const verificationCode = await prisma.verificationCode.create({
+    data: {
+      userId: newUser.id,
+      type: VerificationCodeType.MagicRegister,
+      expiresAt,
+      createdAt: new Date(),
+    },
+  });
+
+  const registerUrl = `${APP_ORIGIN}/signup-with-link/magic?code=${verificationCode.id}`;
+  await sendMagicRegisterEmail(email, registerUrl);
+
+  return { message: "Check your email to complete registration" };
+};
+
+export const verifyMagicRegisterService = async (code: string) => {
+  const validCode = await prisma.verificationCode.findFirst({
+    where: {
+      id: code,
+      type: VerificationCodeType.MagicRegister,
+      expiresAt: { gt: new Date() },
+    },
+  });
+  appAssert(validCode, UNAUTHORIZED, "Link expired or invalid");
+
+  const user = await prisma.user.update({
+    where: { id: validCode.userId },
+    data: { verified: true },
+  });
+
+  await prisma.verificationCode.delete({ where: { id: validCode.id } });
+
+  const session = await prisma.session.create({
+    data: { userId: user.id },
+  });
+
+  const sessionInfo = { sessionId: session.id };
+  const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
+  const accessToken = signToken({ ...sessionInfo, userId: user.id });
+
+  const { password: _, ...userWithoutPassword } = user;
+
   return { accessToken, refreshToken, user: userWithoutPassword };
 };

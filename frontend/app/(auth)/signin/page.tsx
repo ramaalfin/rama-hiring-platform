@@ -18,6 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginMutationFn } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export default function Login() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function Login() {
       onError: (error) => {
         toast({
           title: "Error",
-          description: error.message,
+          description: getErrorMessage(error) || "Something went wrong",
           variant: "destructive",
         });
       },
@@ -117,7 +118,7 @@ export default function Login() {
             </Link>
           </div>
           <Button
-            className="w-full text-[15px] h-[40px] text-neutral-90 font-semibold bg-secondary"
+            className="w-full text-[15px] h-[40px] text-neutral-90 font-semibold bg-secondary hover:bg-yellow-500"
             disabled={isPending}
             type="submit"
           >

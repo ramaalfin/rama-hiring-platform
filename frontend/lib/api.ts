@@ -73,6 +73,20 @@ export const registerMutationFn = async (data: RegisterType) => {
   await API.post("/auth/register", data);
 };
 
+export const magicRegisterMutationFn = async (data: { email: string }) => {
+  await API.post("/auth/magic-register", data);
+};
+
+export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) => {
+  const response = await API.get("/auth/magic-register/verify", {
+    params: { code },
+    headers: {
+      "x-skip-refresh": "1",
+    },
+  });
+  return response.data;
+}
+
 export const forgotPasswordMutationFn = async (data: ForgotPasswordType) => {
   await API.post("/auth/password/forgot", data);
 };
