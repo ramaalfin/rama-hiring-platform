@@ -54,11 +54,6 @@ const Asidebar = () => {
       url: "/sessions",
       icon: Lock,
     },
-    {
-      title: "Blog",
-      url: "/blog",
-      icon: User,
-    },
 
     {
       title: "Settings",
