@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  CANDIDATE
+}
+
 model User {
   id             String             @id @default(uuid())
   fullName       String
@@ -16,9 +21,12 @@ model User {
   isTwoFAEnabled Boolean            @default(false)
   twoFAEmailCode String?
   twoFAExpiresAt DateTime?
+  role           Role               @default(CANDIDATE)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   sessions       Session[]
+  jobs           Job[]
+  applications   Application[]
   verifications  VerificationCode[]
 }
 
@@ -39,4 +47,25 @@ model VerificationCode {
   type      String
   expiresAt DateTime
   createdAt DateTime
+}
+
+model Job {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  applications Application[]
+  createdBy   String
+  creator     User        @relation(fields: [createdBy], references: [id])
+}
+
+model Application {
+  id        String   @id @default(uuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  resume    Json
+  createdAt DateTime @default(now())
 }

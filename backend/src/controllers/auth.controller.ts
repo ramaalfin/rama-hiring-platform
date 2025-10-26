@@ -39,15 +39,18 @@ export const registerController = catchErrors(async (req, res) => {
   const { user, accessToken, refreshToken } = await createAccount(request);
 
   setAuthCookies({ res, accessToken, refreshToken });
+
   return res.status(CREATED).json({
     message: "Account created successfully",
     user: {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
     },
   });
 });
+
 
 export const loginController = catchErrors(async (req, res) => {
   const data = loginSchema.parse({
@@ -56,24 +59,67 @@ export const loginController = catchErrors(async (req, res) => {
     userAgent: req.headers["user-agent"],
   });
 
-  const { accessToken, refreshToken } = await loginUser(data);
+  const { accessToken, refreshToken, user } = await loginUser(data);
 
   setAuthCookies({ res, accessToken, refreshToken });
+
   return res.status(OK).json({
     message: "Login successful",
+    user: {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+    },
   });
 });
+
+
+
+export const sendMagicLoginController = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
+  await sendMagicLoginService(email);
+  return res.status(OK).json({ message: "Check your email for login link" });
+});
+
+export const verifyMagicLoginController = catchErrors(async (req, res) => {
+  const code = verificationCodeSchema.parse(req.query.code);
+  const tokens = await verifyMagicLoginService(code);
+
+  // Set cookie di sini
+  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
+
+  return res.status(200).json({
+    message: "Magic login successful",
+    user: tokens.user,
+  });
+});
+
+export const sendMagicRegisterController = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
+  const result = await sendMagicRegisterService(email);
+  return res.status(OK).json({ message: result.message });
+});
+
+export const verifyMagicRegisterController = catchErrors(async (req, res) => {
+  const code = verificationCodeSchema.parse(req.query.code);
+  const tokens = await verifyMagicRegisterService(code);
+
+  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
+
+  return res.status(200).json({
+    message: "Magic registration successful",
+    user: tokens.user,
+  });
+});
+
 
 export const logoutController = catchErrors(async (req, res) => {
   const accessToken = req.cookies.accessToken;
   const { payload } = verifyToken(accessToken);
 
   if (payload) {
-    // await SessionModel.deleteOne({
-    //   _id: payload.sessionId,
-    //   userId: payload.userId,
-    // });
-
     await prisma.session.deleteMany({
       where: {
         id: payload.sessionId,
@@ -139,44 +185,5 @@ export const resetPasswordController = catchErrors(async (req, res) => {
   clearAuthCookies(res);
   return res.status(OK).json({
     message: "Password reset successful",
-  });
-});
-
-export const sendMagicLoginController = catchErrors(async (req, res) => {
-  const email = emailSchema.parse(req.body.email);
-  await sendMagicLoginService(email);
-  return res.status(OK).json({ message: "Check your email for login link" });
-});
-
-export const verifyMagicLoginController = catchErrors(async (req, res) => {
-  const code = verificationCodeSchema.parse(req.query.code);
-  const tokens = await verifyMagicLoginService(code);
-
-  // Set cookie di sini
-  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
-  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
-
-  return res.status(200).json({
-    message: "Magic login successful",
-    user: tokens.user,
-  });
-});
-
-export const sendMagicRegisterController = catchErrors(async (req, res) => {
-  const email = emailSchema.parse(req.body.email);
-  const result = await sendMagicRegisterService(email);
-  return res.status(OK).json({ message: result.message });
-});
-
-export const verifyMagicRegisterController = catchErrors(async (req, res) => {
-  const code = verificationCodeSchema.parse(req.query.code);
-  const tokens = await verifyMagicRegisterService(code);
-
-  res.cookie("accessToken", tokens.accessToken, getAccessTokenCookieOptions());
-  res.cookie("refreshToken", tokens.refreshToken, getRefreshTokenCookieOptions());
-
-  return res.status(200).json({
-    message: "Magic registration successful",
-    user: tokens.user,
   });
 });

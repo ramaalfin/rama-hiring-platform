@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KeyRound, Loader, MailCheckIcon } from "lucide-react";
+import { KeyRound, Loader } from "lucide-react";
 import { magicRegisterMutationFn } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -120,7 +120,7 @@ export default function SignUp() {
             className="w-full h-[40px] text-neutral-1000"
           >
             <KeyRound className="!w-3 font-bold" />
-            Masuk dengan kata sandi
+            Daftar dengan kata sandi
           </Button>
         </Link>
       </Form>

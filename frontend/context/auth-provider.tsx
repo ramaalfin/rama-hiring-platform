@@ -4,38 +4,43 @@ import useAuth from "@/hooks/use-auth";
 import React, { createContext, useContext } from "react";
 
 type UserType = {
-    fullName: string;
-    email: string;
-    isEmailVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
+  fullName: string;
+  email: string;
+  isEmailVerified: boolean;
+  role: "ADMIN" | "CANDIDATE";
+  createdAt: string;
+  updatedAt: string;
 };
 
 type AuthContextType = {
-    user?: UserType;
-    error: any;
-    isLoading: boolean;
-    isFetching: boolean;
-    refetch: () => void;
+  user?: UserType;
+  error: any;
+  isLoading: boolean;
+  isFetching: boolean;
+  refetch: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { data, error, isLoading, isFetching, refetch } = useAuth();
-    const user = data?.data?.user;
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { data, error, isLoading, isFetching, refetch } = useAuth();
+  const user = data?.data?.user;
 
-    return (
-        <AuthContext.Provider value={{ user, error, isLoading, isFetching, refetch }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider
+      value={{ user, error, isLoading, isFetching, refetch }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuthContext = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error("useAuthContext must be used within a AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuthContext must be used within a AuthProvider");
+  }
+  return context;
 };

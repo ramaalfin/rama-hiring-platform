@@ -15,7 +15,7 @@ import {
   TOO_MANY_REQUESTS,
   UNAUTHORIZED,
 } from "../constants/http";
-import { generateUserTokens, refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
+import { refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
 import {
   sendVerificationEmail,
   sendForgotPasswordEmail,
@@ -38,6 +38,7 @@ export type CreateAccountData = {
   password: string;
   confirmPassword: string;
   userAgent?: string;
+  role?: any;
 };
 
 type LoginParams = {
@@ -94,9 +95,11 @@ export const createAccount = async (data: CreateAccountData) => {
   const accessToken = signToken({
     sessionId: session.id,
     userId: user.id,
+    role: user.role
   });
 
-  return { user: user, refreshToken, accessToken };
+  const { password: _, ...userWithoutPassword } = user;
+  return { user: userWithoutPassword, accessToken, refreshToken };
 };
 
 export const loginUser = async ({
@@ -129,6 +132,7 @@ export const loginUser = async ({
   const accessToken = signToken({
     ...sessionInfo,
     userId,
+    role: user.role
   });
 
   return { user, refreshToken, accessToken };
@@ -193,9 +197,8 @@ export const verifyEmail = async (code: string) => {
     where: { id: validCode.id },
   });
 
-  return {
-    user: updateUser,
-  };
+  const { password: _, ...userWithoutPassword } = updateUser;
+  return { user: userWithoutPassword };
 };
 
 export const forgotPasswordService = async (email: string) => {
@@ -319,7 +322,7 @@ export const verifyMagicLoginService = async (code: string) => {
 
   const sessionInfo = { sessionId: session.id };
   const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
-  const accessToken = signToken({ ...sessionInfo, userId: user.id });
+  const accessToken = signToken({ ...sessionInfo, userId: user.id, role: user.role });
 
   const { password: _, ...userWithoutPassword } = user;
   return { accessToken, refreshToken, user: userWithoutPassword };
@@ -329,12 +332,15 @@ export const sendMagicRegisterService = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   appAssert(!user, CONFLICT, "Email already registered");
 
+  // password awal adalah Rakamin12345
+  const password = await hashValue("Rakamin12345");
+
   const newUser = await prisma.user.create({
     data: {
       email,
       fullName: "",
       verified: false,
-      password: ""
+      password
     },
   });
 
@@ -377,7 +383,7 @@ export const verifyMagicRegisterService = async (code: string) => {
 
   const sessionInfo = { sessionId: session.id };
   const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
-  const accessToken = signToken({ ...sessionInfo, userId: user.id });
+  const accessToken = signToken({ ...sessionInfo, userId: user.id, role: user.role });
 
   const { password: _, ...userWithoutPassword } = user;
 
