@@ -50,14 +50,19 @@ model VerificationCode {
 }
 
 model Job {
-  id          String      @id @default(uuid())
-  title       String
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  applications Application[]
-  createdBy   String
-  creator     User        @relation(fields: [createdBy], references: [id])
+  id             String   @id @default(uuid())
+  jobName        String
+  jobType        String
+  jobDescription String
+  numberOfCandidateNeeded Int   
+  minimumSalary  String
+  maximumSalary  String
+  minimumProfileInformationRequired Json
+  createdBy      String
+  createdByUser  User     @relation(fields: [createdBy], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  applications   Application[]
 }
 
 model Application {

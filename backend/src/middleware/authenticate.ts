@@ -26,6 +26,8 @@ const authenticate: RequestHandler = (req, res, next) => {
   req.userId = payload.userId;
   // @ts-ignore
   req.sessionId = payload.sessionId;
+  // @ts-ignore
+  req.userRole = payload.role;
   next();
 };
 

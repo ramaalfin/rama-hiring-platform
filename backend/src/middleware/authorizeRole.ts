@@ -1,17 +1,11 @@
-import { RequestHandler } from "express";
-import prisma from "../prisma/client";
-import authenticate from "./authenticate";
+import { NextFunction, Request, Response } from "express";
+import appAssert from "../utils/appAssert";
+import { UNAUTHORIZED } from "../constants/http";
 
-export const authorizeRole = (roles: string[]): RequestHandler => {
-    return async (req, res, next) => {
-        await authenticate(req, res, async () => {
-            const user = await prisma.user.findUnique({
-                where: { id: String(req.userId) },
-            });
-            if (!user || !roles.includes(user.role)) {
-                return res.status(403).json({ message: "Forbidden" });
-            }
-            next();
-        });
+export const authorizeRole = (roles: string[]) => {
+    return (req: Request & { userRole?: string }, res: Response, next: NextFunction) => {
+        const userRole = req.userRole;
+        appAssert(userRole && roles.includes(userRole), UNAUTHORIZED, "Not authorized");
+        next();
     };
 };

@@ -168,6 +168,7 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   const accessToken = signToken({
     sessionId: session.id,
     userId: session.userId,
+    role: payload.role,
   });
 
   return { accessToken, newRefreshToken };
