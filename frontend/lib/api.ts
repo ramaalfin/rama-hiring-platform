@@ -104,3 +104,37 @@ export const sessionDeleteMutationFn = async (id: string) => {
 export const logoutMutationFn = async () => {
   await API.get("/auth/logout");
 };
+
+export const createJobMutationFn = async (data: any, token: string) => {
+  const response = await API.post("/jobs", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const updateJobMutationFn = async (id: string, data: any) => {
+  const response = await API.patch(`/jobs/${id}`, data);
+  return response.data;
+};
+
+export const deleteJobMutationFn = async (id: string) => {
+  const response = await API.delete(`/jobs/${id}`);
+  return response.data;
+};
+
+export const getJobByIdQueryFn = async (id: string) => {
+  const response = await API.get(`/jobs/${id}`);
+  return response.data;
+};
+
+export const getAllJobsQueryFn = async (token: string) => {
+  const response = await API.get("/jobs", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+}
