@@ -6,22 +6,22 @@ import { AuthProvider } from "@/context/auth-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function MainLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <AuthProvider>
-            <SidebarProvider>
-                <Asidebar />
-                <SidebarInset>
-                    <main className="w-full">
-                        <Header />
-                        {children}
-                        <Toaster />
-                    </main>
-                </SidebarInset>
-            </SidebarProvider>
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+      <SidebarProvider>
+        <Asidebar />
+        <SidebarInset>
+          <main className="w-full">
+            <Header />
+            {children}
+            <Toaster />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </AuthProvider>
+  );
 }

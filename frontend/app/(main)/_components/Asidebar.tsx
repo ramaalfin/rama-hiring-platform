@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useMemo } from "react";
 import {
   EllipsisIcon,
   Home,
   Loader,
-  Lock,
   LogOut,
   MoonStarIcon,
-  Settings,
   SunIcon,
-  User,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -43,24 +43,49 @@ const Asidebar = () => {
   const { isLoading, user } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const { open } = useSidebar();
-  const items = [
-    {
-      title: "Home",
-      url: "/home",
-      icon: Home,
-    },
-    {
-      title: "Sessions",
-      url: "/sessions",
-      icon: Lock,
-    },
 
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
-    },
-  ];
+  // dummy role
+  const role = "ADMIN";
+
+  const items = useMemo(() => {
+    // if (!user?.role) return [];
+
+    // if (user.role === "ADMIN") {
+    if (role === "ADMIN") {
+      return [
+        {
+          title: "Home",
+          url: "/admin/home",
+          icon: Home,
+        },
+        {
+          title: "Job List",
+          url: "/admin/job-list",
+          icon: Briefcase,
+        },
+      ];
+    }
+
+    // if (user.role === "CANDIDATE") {
+    if (role === "CANDIDATE") {
+      return [
+        {
+          title: "Home",
+          url: "/home",
+          icon: Home,
+        },
+        {
+          title: "Job List",
+          url: "/job-list",
+          icon: Briefcase,
+        },
+      ];
+    }
+
+    return [];
+    // }, [user?.role]);
+  }, [role]);
+
   return (
     <>
       <Sidebar collapsible="icon">
@@ -72,29 +97,35 @@ const Asidebar = () => {
                 href="/home"
                 className="hidden md:flex ml-2 text-xl tracking-[-0.16px] text-black dark:text-[#fcfdffef] font-bold mb-0"
               >
-                Squeezy
+                Rakamin
               </Link>
             )}
           </div>
         </SidebarHeader>
+
         <SidebarContent className="dark:bg-background">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.url} className="!text-[15px]">
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {isLoading ? (
+                  <Loader className="animate-spin place-self-center my-4" />
+                ) : (
+                  items.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link href={item.url} className="!text-[15px]">
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
         <SidebarFooter className="dark:bg-background">
           <SidebarMenu>
             <SidebarMenuItem>
@@ -109,9 +140,9 @@ const Asidebar = () => {
                     >
                       <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarFallback className="rounded-lg">
-                          {user?.fullName?.split(" ")?.[0].charAt(0)}
+                          {user?.fullName?.split(" ")?.[0]?.charAt(0)}
                           {user?.fullName?.split(" ")?.[1]
-                            ? user?.fullName?.split(" ")?.[1].charAt(0)
+                            ? user?.fullName?.split(" ")?.[1]?.charAt(0)
                             : null}
                         </AvatarFallback>
                       </Avatar>
@@ -124,9 +155,10 @@ const Asidebar = () => {
                       <EllipsisIcon className="ml-auto size-4" />
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent
                     className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                    side={"bottom"}
+                    side="bottom"
                     align="start"
                     sideOffset={4}
                   >
@@ -151,6 +183,7 @@ const Asidebar = () => {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
+
         <SidebarRail />
       </Sidebar>
 

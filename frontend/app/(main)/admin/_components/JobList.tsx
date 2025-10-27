@@ -1,4 +1,3 @@
-// src/app/(admin)/admin/_components/JobList.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,36 +5,77 @@ import { getAllJobsQueryFn } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
+import Image from "next/image";
 
 const JobList = ({ token }: { token: string }) => {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["jobs"],
-    queryFn: () => getAllJobsQueryFn(token),
-  });
+  // const { data, isLoading, isError, error } = useQuery({
+  //   queryKey: ["jobs"],
+  //   queryFn: () => getAllJobsQueryFn(token),
+  // });
 
-  if (isLoading) return <p>Loading jobs...</p>;
-  if (isError) return <p>Error: {(error as Error).message}</p>;
+  const data = null;
+  const isLoading = false;
+  const isError = false;
+  const error = null;
 
-  if (!data || data.length === 0)
-    return <p className="text-gray-500">No jobs found.</p>;
+  if (isLoading)
+    return <p className="text-center text-gray-500 mt-8">Loading jobs...</p>;
+
+  if (isError)
+    return (
+      <p className="text-center text-red-500 mt-8">
+        Error: {(error as Error).message}
+      </p>
+    );
+
+  // ✅ Kondisi jika tidak ada data
+  if (!data || data.jobs.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <Image
+          src="/assets/illustration/Empty State.svg"
+          alt="No Data"
+          width={1200}
+          height={800}
+          className="size-60 object-contain"
+        />
+        <h2 className="text-lg font-semibold text-neutral-90">
+          No job openings available
+        </h2>
+        <p className="text-neutral-90">
+          Create a job opening now and start the candidate process.
+        </p>
+        <Link href="/admin/home">
+          <Button
+            variant="default"
+            className="bg-secondary text-neutral-90 hover:bg-opacity-90"
+          >
+            Create a new job
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-4 mt-4">
       {data.jobs.map((job: any) => (
-        <div className="flex flex-col gap-2 rounded-xl p-4 transition shadow-md">
+        <div
+          key={job.id}
+          className="flex flex-col gap-2 rounded-xl p-4 transition shadow-md bg-white border border-neutral-200"
+        >
           <div className="border border-neutral-40 w-fit rounded-md">
             {job.createdAt && (
               <p className="text-sm text-neutral-90 p-2">
-                {/* 2 oct 2025 */}
                 started on {format(new Date(job.createdAt), "d MMM yyyy")}
               </p>
             )}
           </div>
 
           <div className="flex flex-row justify-between items-center">
-            <div key={job.id} className=" space-y-2">
-              <h3 className="font-semibold text-neutral-80">{job.jobName}</h3>
-              <p className="text-sm">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-neutral-800">{job.jobName}</h3>
+              <p className="text-sm text-neutral-600">
                 {job.minimumSalary} - {job.maximumSalary}
               </p>
             </div>
@@ -43,7 +83,7 @@ const JobList = ({ token }: { token: string }) => {
             <Link href={`/admin/jobs/${job.id}`}>
               <Button
                 variant="default"
-                className="w-full bg-primary text-white hover:bg-opacity-90"
+                className="bg-primary text-white hover:bg-opacity-90"
               >
                 Manage Job
               </Button>
