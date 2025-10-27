@@ -27,7 +27,6 @@ export default function JobFormModal({
       <DialogTrigger asChild>
         <Button
           variant="default"
-          // className="bg-primary text-white font-semibold hover:bg-opacity-90"
           className={`${bgColor} ${color} font-semibold hover:bg-opacity-90`}
         >
           Create a New Job

@@ -33,18 +33,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import Logo from "@/components/logo";
 import LogoutDialog from "./_common/LogoutDialog";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/stores/authStore";
+import Image from "next/image";
 
 const Asidebar = () => {
   const { theme, setTheme } = useTheme();
   const user = useAuthStore((state) => state.user);
   const [isOpen, setIsOpen] = useState(false);
   const { open } = useSidebar();
-
-  console.log("user", user);
 
   // dummy role
   // const role = "ADMIN";
@@ -93,13 +91,18 @@ const Asidebar = () => {
       <Sidebar collapsible="icon">
         <SidebarHeader className="!pt-0 dark:bg-background">
           <div className="flex h-[60px] items-center">
-            <Logo fontSize="20px" size="30px" url="/home" />
             {open && (
               <Link
                 href="/home"
                 className="hidden md:flex ml-2 text-xl tracking-[-0.16px] text-black dark:text-[#fcfdffef] font-bold mb-0"
               >
-                Rakamin
+                <Image
+                  width={200}
+                  height={100}
+                  src="/assets/logo/Logo Rakamin.svg"
+                  alt="logo rakamin"
+                  className="w-28"
+                />
               </Link>
             )}
           </div>

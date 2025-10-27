@@ -2,7 +2,7 @@ import { APP_ORIGIN } from "../constants/env";
 import VerificationCodeType from "../constants/verificationCodeType";
 import {
   fiveMinutesAgo,
-  fiveMinutesFromNow,
+  thirtyMinutesFromNow,
   ONE_DAY_MS,
   oneHourFromNow,
   oneYearFromNow,
@@ -283,7 +283,7 @@ export const sendMagicLoginService = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   appAssert(user, NOT_FOUND, "Email not found");
 
-  const expiresAt = fiveMinutesFromNow();
+  const expiresAt = thirtyMinutesFromNow();
 
   const verificationCode = await prisma.verificationCode.create({
     data: {
@@ -345,7 +345,7 @@ export const sendMagicRegisterService = async (email: string) => {
     },
   });
 
-  const expiresAt = fiveMinutesFromNow();
+  const expiresAt = thirtyMinutesFromNow();
   const verificationCode = await prisma.verificationCode.create({
     data: {
       userId: newUser.id,

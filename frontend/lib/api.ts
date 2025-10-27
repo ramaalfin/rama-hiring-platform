@@ -57,7 +57,14 @@ export const loginMutationFn = async (data: LoginType) => {
 
 
 export const magicLoginMutationFn = async (data: { email: string }) => {
-  await API.post("/auth/magic-login", data);
+  const response = await API.post("/auth/magic-login", data);
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
 }
 
 export const verifyMagicLoginMutationFn = async ({ code }: { code: string }) => {
@@ -91,7 +98,14 @@ export const registerMutationFn = async (data: RegisterType) => {
 };
 
 export const magicRegisterMutationFn = async (data: { email: string }) => {
-  await API.post("/auth/magic-register", data);
+  const response = await API.post("/auth/magic-register", data);
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
 };
 
 export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) => {
@@ -172,3 +186,15 @@ export const getAllJobsQueryFn = async (token: string) => {
   });
   return response.data;
 }
+
+export const getAdminJobsFn = async (adminId: string, token: string) => {
+  const response = await API.get(`/jobs/admin/${adminId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  console.log("response", response);
+
+  return response.data.data;
+};

@@ -6,7 +6,7 @@ const AdminDetailJobListPage = () => {
   const token = cookies().get("accessToken")?.value;
 
   return (
-    <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="p-6">
       <DetailJob token={token} />
     </div>
   );

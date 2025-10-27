@@ -1,49 +1,58 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { getAllJobsQueryFn } from "@/lib/api";
+import { getAdminJobsFn, getAllJobsQueryFn } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
 import Image from "next/image";
 import JobFormModal from "./JobFormModal";
+import { useAuthStore } from "@/stores/authStore";
 
-const data = {
-  jobs: [
-    {
-      id: "1",
-      jobName: "Frontend Developer",
-      minimumSalary: 8000000,
-      maximumSalary: 15000000,
-      createdAt: "2025-10-01T10:00:00Z",
-    },
-    {
-      id: "2",
-      jobName: "Backend Engineer",
-      minimumSalary: 10000000,
-      maximumSalary: 18000000,
-      createdAt: "2025-09-25T09:30:00Z",
-    },
-    {
-      id: "3",
-      jobName: "UI/UX Designer",
-      minimumSalary: 7000000,
-      maximumSalary: 12000000,
-      createdAt: "2025-10-05T14:00:00Z",
-    },
-  ],
-};
+// const data = {
+//   jobs: [
+//     {
+//       id: "1",
+//       jobName: "Frontend Developer",
+//       minimumSalary: 8000000,
+//       maximumSalary: 15000000,
+//       createdAt: "2025-10-01T10:00:00Z",
+//     },
+//     {
+//       id: "2",
+//       jobName: "Backend Engineer",
+//       minimumSalary: 10000000,
+//       maximumSalary: 18000000,
+//       createdAt: "2025-09-25T09:30:00Z",
+//     },
+//     {
+//       id: "3",
+//       jobName: "UI/UX Designer",
+//       minimumSalary: 7000000,
+//       maximumSalary: 12000000,
+//       createdAt: "2025-10-05T14:00:00Z",
+//     },
+//   ],
+// };
 
 const JobList = ({ token }: { token: string }) => {
-  // const { data, isLoading, isError, error } = useQuery({
-  //   queryKey: ["jobs"],
-  //   queryFn: () => getAllJobsQueryFn(token),
-  // });
+  const user = useAuthStore((state) => state.user);
+  const adminId = user?.id!;
+
+  console.log("token", token);
+
+  console.log("user", user);
+  console.log("adminId", adminId);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["adminJobs", user?.id],
+    queryFn: () => getAdminJobsFn(user!.id, token!),
+  });
 
   // const data = null;
-  const isLoading = false;
-  const isError = false;
-  const error = null;
+  // const isLoading = false;
+  // const isError = false;
+  // const error = null;
 
   if (isLoading)
     return <p className="text-center text-gray-500 mt-8">Loading jobs...</p>;
@@ -56,7 +65,7 @@ const JobList = ({ token }: { token: string }) => {
     );
 
   // ✅ Kondisi jika tidak ada data
-  if (!data || data.jobs.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
         <Image
@@ -80,7 +89,7 @@ const JobList = ({ token }: { token: string }) => {
 
   return (
     <div className="grid gap-4 mt-4">
-      {data.jobs.map((job: any) => (
+      {data.map((job: any) => (
         <div
           key={job.id}
           className="flex flex-col gap-2 rounded-xl p-4 transition shadow-md bg-white border border-neutral-200"
@@ -101,7 +110,7 @@ const JobList = ({ token }: { token: string }) => {
               </p>
             </div>
 
-            <Link href={`/admin/job-list/${job.id}`}>
+            <Link href={`/admin/job-list/${job.jobName}`}>
               <Button
                 variant="default"
                 className="bg-primary text-white hover:bg-opacity-90"
