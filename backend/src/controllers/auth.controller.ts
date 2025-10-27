@@ -69,6 +69,7 @@ export const loginController = catchErrors(async (req, res) => {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+      role: user.role,
     },
   });
 });

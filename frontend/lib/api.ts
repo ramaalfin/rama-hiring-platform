@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import API from "./axios-client";
+import { useAuthStore } from "@/stores/authStore";
 
 type LoginType = {
   email: string;
@@ -42,8 +43,18 @@ type SessionResponseType = {
 
 // authentication API calls
 export const loginMutationFn = async (data: LoginType) => {
-  await API.post("/auth/login", data);
+  const response = await API.post("/auth/login", data);
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
+
+  return user;
 };
+
 
 export const magicLoginMutationFn = async (data: { email: string }) => {
   await API.post("/auth/magic-login", data);
@@ -57,11 +68,26 @@ export const verifyMagicLoginMutationFn = async ({ code }: { code: string }) => 
       "x-skip-refresh": "1",
     },
   });
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
+
   return response.data;
 };
 
 export const registerMutationFn = async (data: RegisterType) => {
-  await API.post("/auth/register", data);
+  const response = await API.post("/auth/register", data);
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
 };
 
 export const magicRegisterMutationFn = async (data: { email: string }) => {
@@ -75,6 +101,14 @@ export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) 
       "x-skip-refresh": "1",
     },
   });
+
+  const result = response.data;
+  const user = result?.user;
+
+  // Simpan user ke Zustand
+  const { setUser } = useAuthStore.getState();
+  setUser(user);
+
   return response.data;
 }
 

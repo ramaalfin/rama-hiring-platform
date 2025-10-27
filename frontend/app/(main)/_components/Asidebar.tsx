@@ -34,24 +34,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
-import { useAuthContext } from "@/context/auth-provider";
 import LogoutDialog from "./_common/LogoutDialog";
 import { useTheme } from "next-themes";
+import { useAuthStore } from "@/stores/authStore";
 
 const Asidebar = () => {
   const { theme, setTheme } = useTheme();
-  const { isLoading, user } = useAuthContext();
+  const user = useAuthStore((state) => state.user);
   const [isOpen, setIsOpen] = useState(false);
   const { open } = useSidebar();
 
+  console.log("user", user);
+
   // dummy role
-  const role = "ADMIN";
+  // const role = "ADMIN";
 
   const items = useMemo(() => {
-    // if (!user?.role) return [];
+    if (!user?.role) return [];
 
-    // if (user.role === "ADMIN") {
-    if (role === "ADMIN") {
+    if (user.role === "ADMIN") {
+      // if (role === "ADMIN") {
       return [
         {
           title: "Home",
@@ -66,8 +68,8 @@ const Asidebar = () => {
       ];
     }
 
-    // if (user.role === "CANDIDATE") {
-    if (role === "CANDIDATE") {
+    if (user.role === "CANDIDATE") {
+      // if (role === "CANDIDATE") {
       return [
         {
           title: "Home",
@@ -83,8 +85,8 @@ const Asidebar = () => {
     }
 
     return [];
-    // }, [user?.role]);
-  }, [role]);
+  }, [user?.role]);
+  // }, [role]);
 
   return (
     <>
@@ -107,7 +109,7 @@ const Asidebar = () => {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {isLoading ? (
+                {!user ? (
                   <Loader className="animate-spin place-self-center my-4" />
                 ) : (
                   items.map((item) => (
@@ -129,7 +131,7 @@ const Asidebar = () => {
         <SidebarFooter className="dark:bg-background">
           <SidebarMenu>
             <SidebarMenuItem>
-              {isLoading ? (
+              {!user ? (
                 <Loader className="animate-spin place-self-center self-center" />
               ) : (
                 <DropdownMenu>

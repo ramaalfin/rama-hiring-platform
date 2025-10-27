@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 
 const Header = () => {
   const pathname = usePathname();
-  const pathSegments = pathname.split("/").filter(Boolean); // Split path into segments
+  const pathSegments = pathname.split("/").filter(Boolean);
   const isDetailPage =
     pathSegments.length === 3 &&
     pathSegments[0] === "admin" &&

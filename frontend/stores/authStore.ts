@@ -1,23 +1,22 @@
+"use client";
+
 import { create } from "zustand";
 
-interface MagicLoginResponse {
-    message: string;
-    user?: {
-        id: string;
-        fullName: string;
-        email: string;
-        verified: boolean;
-    };
-}
+type User = {
+    id: string;
+    email: string;
+    fullName: string;
+    role: "ADMIN" | "CANDIDATE";
+};
 
-interface AuthState {
-    magicLoginResponse: MagicLoginResponse | null;
-    setMagicLoginResponse: (data: MagicLoginResponse | null) => void;
-    clearMagicLoginResponse: () => void;
-}
+type AuthState = {
+    user: User | null;
+    setUser: (user: User | null) => void;
+    clearUser: () => void;
+};
 
 export const useAuthStore = create<AuthState>((set) => ({
-    magicLoginResponse: null,
-    setMagicLoginResponse: (data) => set({ magicLoginResponse: data }),
-    clearMagicLoginResponse: () => set({ magicLoginResponse: null }),
+    user: null,
+    setUser: (user) => set({ user }),
+    clearUser: () => set({ user: null }),
 }));
