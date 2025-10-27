@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
 import React from "react";
+import JobFormModal from "./JobFormModal";
 
-const RecruitBanner = () => {
+const RecruitBanner = ({ token }: { token?: string }) => {
   return (
     <div
       className="relative w-full h-[180px] rounded-2xl overflow-hidden bg-cover bg-center flex flex-col items-center justify-center text-center p-4"
@@ -15,12 +15,7 @@ const RecruitBanner = () => {
         <p className="text-sm font-medium">
           Create jobs, invite, and hire with ease
         </p>
-        <Button
-          variant="default"
-          className="bg-primary text-white hover:bg-primary/90 mt-4 px-6 py-2"
-        >
-          Create New Job
-        </Button>
+        <JobFormModal token={token} color="text-white" />
       </div>
     </div>
   );

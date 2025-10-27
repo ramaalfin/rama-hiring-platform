@@ -6,6 +6,33 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { format } from "date-fns";
 import Image from "next/image";
+import JobFormModal from "./JobFormModal";
+
+const data = {
+  jobs: [
+    {
+      id: "1",
+      jobName: "Frontend Developer",
+      minimumSalary: 8000000,
+      maximumSalary: 15000000,
+      createdAt: "2025-10-01T10:00:00Z",
+    },
+    {
+      id: "2",
+      jobName: "Backend Engineer",
+      minimumSalary: 10000000,
+      maximumSalary: 18000000,
+      createdAt: "2025-09-25T09:30:00Z",
+    },
+    {
+      id: "3",
+      jobName: "UI/UX Designer",
+      minimumSalary: 7000000,
+      maximumSalary: 12000000,
+      createdAt: "2025-10-05T14:00:00Z",
+    },
+  ],
+};
 
 const JobList = ({ token }: { token: string }) => {
   // const { data, isLoading, isError, error } = useQuery({
@@ -13,7 +40,7 @@ const JobList = ({ token }: { token: string }) => {
   //   queryFn: () => getAllJobsQueryFn(token),
   // });
 
-  const data = null;
+  // const data = null;
   const isLoading = false;
   const isError = false;
   const error = null;
@@ -31,7 +58,7 @@ const JobList = ({ token }: { token: string }) => {
   // ✅ Kondisi jika tidak ada data
   if (!data || data.jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center text-center space-y-4">
+      <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
         <Image
           src="/assets/illustration/Empty State.svg"
           alt="No Data"
@@ -45,14 +72,8 @@ const JobList = ({ token }: { token: string }) => {
         <p className="text-neutral-90">
           Create a job opening now and start the candidate process.
         </p>
-        <Link href="/admin/home">
-          <Button
-            variant="default"
-            className="bg-secondary text-neutral-90 hover:bg-opacity-90"
-          >
-            Create a new job
-          </Button>
-        </Link>
+
+        <JobFormModal token={token!} bgColor="bg-secondary" />
       </div>
     );
   }
@@ -80,7 +101,7 @@ const JobList = ({ token }: { token: string }) => {
               </p>
             </div>
 
-            <Link href={`/admin/jobs/${job.id}`}>
+            <Link href={`/admin/job-list/${job.id}`}>
               <Button
                 variant="default"
                 className="bg-primary text-white hover:bg-opacity-90"
