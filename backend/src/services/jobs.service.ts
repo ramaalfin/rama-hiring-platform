@@ -1,14 +1,12 @@
 import prisma from "../prisma/client";
 import appAssert from "../utils/appAssert";
 import {
-    CONFLICT,
     INTERNAL_SERVER_ERROR,
     NOT_FOUND,
     UNAUTHORIZED,
     OK,
 } from "../constants/http";
 
-// Struktur field minimum profile
 type ProfileFieldStatus = "MANDATORY" | "OPTIONAL" | "OFF";
 
 interface ProfileRequirements {
@@ -32,7 +30,6 @@ interface JobPayload {
     minimumProfileInformationRequired: ProfileRequirements;
 }
 
-// ✅ CREATE JOB
 export const createJobService = async (userId: string, payload: JobPayload) => {
     try {
         const newJob = await prisma.job.create({
@@ -60,7 +57,6 @@ export const createJobService = async (userId: string, payload: JobPayload) => {
     }
 };
 
-// ✅ UPDATE JOB
 export const updateJobService = async (jobId: string, payload: JobPayload) => {
     try {
         const existingJob = await prisma.job.findUnique({ where: { id: jobId } });
@@ -91,7 +87,6 @@ export const updateJobService = async (jobId: string, payload: JobPayload) => {
     }
 };
 
-// ✅ GET ALL JOBS (ADMIN-OWNED)
 export const getAllJobsService = async (req: any) => {
     try {
         const {
@@ -157,77 +152,149 @@ export const getAllJobsService = async (req: any) => {
     }
 };
 
-// ✅ GET JOBS BY ADMIN (SPECIFIC ADMIN ID)
-export const getJobByAdminService = async (adminId: string, query: any) => {
+// export const getJobByAdminService = async (adminId: string, query: any) => {
+//     try {
+//         const {
+//             page = 1,
+//             limit = 10,
+//             sortBy = "createdAt",
+//             order = "desc",
+//             jobType,
+//             search,
+//         } = query;
+
+//         const skip = (Number(page) - 1) * Number(limit);
+//         const take = Number(limit);
+
+//         const where: any = {
+//             createdBy: adminId,
+//         };
+
+//         if (jobType) {
+//             where.jobType = jobType;
+//         }
+
+//         if (search) {
+//             where.OR = [
+//                 { jobName: { contains: search, mode: "insensitive" } },
+//                 { jobDescription: { contains: search, mode: "insensitive" } },
+//             ];
+//         }
+
+//         const [jobs, total] = await Promise.all([
+//             prisma.job.findMany({
+//                 where,
+//                 include: {
+//                     createdByUser: {
+//                         select: {
+//                             id: true,
+//                             fullName: true,
+//                             email: true,
+//                         },
+//                     },
+//                 },
+//                 orderBy: { [sortBy]: order },
+//                 skip,
+//                 take,
+//             }),
+//             prisma.job.count({ where }),
+//         ]);
+
+//         const totalPages = Math.ceil(total / take);
+
+//         return {
+//             status: OK,
+//             message: "Jobs fetched successfully",
+//             data: jobs,
+//             meta: {
+//                 total,
+//                 page: Number(page),
+//                 limit: Number(limit),
+//                 totalPages,
+//                 sortBy,
+//                 order,
+//             },
+//         };
+//     } catch (error) {
+//         console.error("Error fetching jobs by admin:", error);
+//         appAssert(false, INTERNAL_SERVER_ERROR, "Failed to fetch jobs");
+//     }
+// };
+
+export const getJobByAdminService = async (
+    adminId: string,
+    search: string,
+    sortBy: string,
+    page: number,
+    limit: number
+) => {
     try {
-        const {
-            page = 1,
-            limit = 10,
-            sortBy = "createdAt",
-            order = "desc",
-            jobType,
-            search,
-        } = query;
+        const skip = (page - 1) * limit;
 
-        const skip = (Number(page) - 1) * Number(limit);
-        const take = Number(limit);
-
-        const where: any = {
+        const whereClause: any = {
             createdBy: adminId,
         };
 
-        if (jobType) {
-            where.jobType = jobType;
+        if (status !== "all") {
+            whereClause.status = status;
         }
 
         if (search) {
-            where.OR = [
+            whereClause.OR = [
                 { jobName: { contains: search, mode: "insensitive" } },
                 { jobDescription: { contains: search, mode: "insensitive" } },
             ];
         }
 
-        const [jobs, total] = await Promise.all([
-            prisma.job.findMany({
-                where,
-                include: {
-                    createdByUser: {
-                        select: {
-                            id: true,
-                            fullName: true,
-                            email: true,
-                        },
-                    },
+        let orderBy = {};
+        switch (sortBy) {
+            case "date-asc":
+                orderBy = { createdAt: "asc" };
+                break;
+            case "date-desc":
+                orderBy = { createdAt: "desc" };
+                break;
+            case "min-salary":
+                orderBy = { minimumSalary: "asc" };
+                break;
+            case "max-salary":
+                orderBy = { maximumSalary: "desc" };
+                break;
+            default:
+                orderBy = { createdAt: "desc" };
+        }
+
+        const totalCount = await prisma.job.count({ where: whereClause });
+
+        // 📦 Fetch paginated data
+        const jobs = await prisma.job.findMany({
+            where: whereClause,
+            include: {
+                createdByUser: {
+                    select: { id: true, fullName: true, email: true },
                 },
-                orderBy: { [sortBy]: order },
-                skip,
-                take,
-            }),
-            prisma.job.count({ where }),
-        ]);
-
-        const totalPages = Math.ceil(total / take);
-
-        return {
-            status: OK,
-            message: "Jobs fetched successfully",
-            data: jobs,
-            meta: {
-                total,
-                page: Number(page),
-                limit: Number(limit),
-                totalPages,
-                sortBy,
-                order,
             },
+            orderBy,
+            skip,
+            take: limit,
+        });
+
+        const meta = {
+            totalCount,
+            totalPages: Math.ceil(totalCount / limit),
+            currentPage: page,
+            limit,
         };
+
+        return { jobs, totalCount, meta };
     } catch (error) {
-        console.error("Error fetching jobs by admin:", error);
+        console.error("Error fetching jobs:", error);
         appAssert(false, INTERNAL_SERVER_ERROR, "Failed to fetch jobs");
     }
 };
 
-// ✅ GET JOB BY ID
+
+
 export const getJobByIdService = async (id: string) => {
     try {
         const job = await prisma.job.findUnique({
@@ -252,7 +319,6 @@ export const getJobByIdService = async (id: string) => {
     }
 };
 
-// ✅ DELETE JOB
 export const deleteJobService = async (id: string, userId: string) => {
     try {
         const existingJob = await prisma.job.findUnique({ where: { id } });

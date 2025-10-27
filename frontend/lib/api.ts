@@ -194,7 +194,5 @@ export const getAdminJobsFn = async (adminId: string, token: string) => {
     },
   });
 
-  console.log("response", response);
-
   return response.data.data;
 };

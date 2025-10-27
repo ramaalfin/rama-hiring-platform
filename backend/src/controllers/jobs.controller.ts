@@ -10,7 +10,6 @@ import {
     getJobByAdminService,
 } from "../services/jobs.service";
 
-// CREATE JOB
 export const createJobController = catchErrors(async (req, res) => {
     const { userId } = req;
     const data = req.body;
@@ -19,7 +18,6 @@ export const createJobController = catchErrors(async (req, res) => {
     return res.status(CREATED).json({ job: newJob });
 });
 
-// UPDATE JOB
 export const updateJobController = catchErrors(async (req, res) => {
     const { id } = req.params;
     const data = req.body;
@@ -29,13 +27,11 @@ export const updateJobController = catchErrors(async (req, res) => {
     return res.status(OK).json({ job: updated });
 });
 
-// GET ALL JOBS
 export const getAllJobsController = catchErrors(async (req, res) => {
     const result = await getAllJobsService(req);
     return res.status(result.status).json(result);
 });
 
-// GET JOB BY ID
 export const getJobByIdController = catchErrors(async (req, res) => {
     const { id } = req.params;
 
@@ -46,16 +42,35 @@ export const getJobByIdController = catchErrors(async (req, res) => {
 export const getAllJobsByAdminController = catchErrors(async (req, res) => {
     const { id } = req.params;
 
+    const {
+        search = "",
+        sortBy = "date-desc",
+        page = "1",
+        limit = "10",
+    } = req.query;
+
+
     if (req.userId.toString() !== id) {
         return res.status(FORBIDDEN).json({ message: "You are not allowed to view other admin's jobs" });
     }
 
-    const result = await getJobByAdminService(id, req);
-    return res.status(result.status).json(result);
+    const { jobs, totalCount, meta } = await getJobByAdminService(
+        id,
+        search as string,
+        sortBy as string,
+        Number(page),
+        Number(limit)
+    );
+
+    return res.status(OK).json({
+        status: "success",
+        message: "Jobs retrieved successfully",
+        data: jobs,
+        meta,
+    });
 });
 
 
-// DELETE JOB
 export const deleteJobController = catchErrors(async (req, res) => {
     const { id, userId } = req.params;
     const deletedJob = await deleteJobService(id, userId);

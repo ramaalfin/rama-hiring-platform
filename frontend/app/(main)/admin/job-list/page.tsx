@@ -1,7 +1,6 @@
 import React from "react";
 import { cookies } from "next/headers";
 import JobList from "../_components/JobList";
-import { Input } from "@/components/ui/input";
 import RecruitBanner from "../_components/RecruiteBanner";
 import JobFormModal from "../_components/JobFormModal";
 
@@ -15,7 +14,6 @@ const AdminJobListPage = () => {
       </div>
 
       <div className="lg:col-span-3">
-        <Input placeholder="Search by job detail" />
         <JobList token={token!} />
       </div>
 
