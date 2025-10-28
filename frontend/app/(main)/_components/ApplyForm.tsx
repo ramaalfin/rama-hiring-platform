@@ -1,14 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { jobSchema, JobFormValues } from "@/schemas/jobSchema";
 import {
   Form,
-  FormField,
   FormItem,
   FormLabel,
   FormControl,
+  FormField,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,15 +17,43 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectTrigger,
+  SelectValue,
   SelectContent,
   SelectItem,
-  SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { getErrorMessage } from "@/lib/get-error-message";
-import { createJobMutationFn } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
+
+// --- Schema ---
+const applySchema = z.object({
+  photoProfile: z.instanceof(File).optional(),
+  fullName: z.string().min(2, "Full name is required"),
+  dateOfBirth: z.string().nonempty("Date of birth is required"),
+  domicile: z.string().nonempty("Please select domicile"),
+  countryCode: z.string().nonempty(),
+  phoneNumber: z.string().min(6, "Enter a valid number"),
+  email: z.string().email(),
+  linkedinLink: z.string().url().optional(),
+});
+
+type ApplyFormValues = z.infer<typeof applySchema>;
+
+// --- Dummy location data ---
+const dummyLocations = [
+  "Jakarta",
+  "Bandung",
+  "Surabaya",
+  "Medan",
+  "Yogyakarta",
+];
+
+// --- Dummy country codes ---
+const countryCodes = [
+  { code: "+62", label: "Indonesia" },
+  { code: "+60", label: "Malaysia" },
+  { code: "+65", label: "Singapore" },
+  { code: "+63", label: "Philippines" },
+  { code: "+1", label: "United States" },
+];
 
 export default function ApplyForm({
   token,
@@ -33,226 +62,191 @@ export default function ApplyForm({
   token?: string;
   onSuccess?: () => void;
 }) {
-  const { mutate, isPending } = useMutation({
-    mutationFn: (data: JobFormValues) => createJobMutationFn(data, token!),
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Job berhasil dibuat!",
-      });
-      form.reset();
-      onSuccess?.();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: getErrorMessage(error) || "Gagal membuat pekerjaan",
-        variant: "destructive",
-      });
-    },
-  });
+  const [photo, setPhoto] = useState<File | null>(null);
 
-  const form = useForm<JobFormValues>({
-    resolver: zodResolver(jobSchema),
+  const form = useForm<ApplyFormValues>({
+    resolver: zodResolver(applySchema),
     defaultValues: {
-      jobName: "",
-      jobType: "",
-      jobDescription: "",
-      numberOfCandidateNeeded: 1,
-      minimumSalary: "",
-      maximumSalary: "",
-      minimumProfileInformationRequired: {
-        fullName: "mandatory",
-        photoProfile: "optional",
-        gender: "off",
-        domicile: "off",
-        email: "mandatory",
-        phoneNumber: "optional",
-        linkedinLink: "off",
-        dateOfBirth: "off",
-      },
+      fullName: "",
+      dateOfBirth: "",
+      domicile: "",
+      countryCode: "+62",
+      phoneNumber: "",
+      email: "",
+      linkedinLink: "",
     },
   });
 
-  const profileFields = [
-    { key: "fullName", label: "Full Name" },
-    { key: "photoProfile", label: "Photo Profile" },
-    { key: "gender", label: "Gender" },
-    { key: "domicile", label: "Domicile" },
-    { key: "email", label: "Email" },
-    { key: "phoneNumber", label: "Phone Number" },
-    { key: "linkedinLink", label: "LinkedIn Link" },
-    { key: "dateOfBirth", label: "Date of Birth" },
-  ] as const;
+  const handleTakePicture = () => {
+    toast({
+      title: "Take Picture",
+      description: "Simulating camera access...",
+    });
+  };
 
-  const profileOptions = [
-    { value: "mandatory", label: "Mandatory" },
-    { value: "optional", label: "Optional" },
-    { value: "off", label: "Off" },
-  ];
-
-  const onSubmit = (values: JobFormValues) => {
-    mutate(values);
+  const onSubmit = (values: ApplyFormValues) => {
+    console.log(values);
+    toast({
+      title: "Application Submitted",
+      description: "Your job application has been submitted successfully.",
+    });
+    form.reset();
+    onSuccess?.();
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="">
-        <div className="space-y-6 p-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="p-4 space-y-6">
+        {/* Photo */}
+        <FormItem>
+          <FormLabel>Photo Profile</FormLabel>
+          <FormControl>
+            <div className="flex items-center gap-4">
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+              />
+              <Button type="button" onClick={handleTakePicture}>
+                Take a Picture
+              </Button>
+            </div>
+          </FormControl>
+          {photo && <p className="text-sm text-gray-600 mt-1">{photo.name}</p>}
+        </FormItem>
+        {/* Full Name */}
+        <FormField
+          control={form.control}
+          name="fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="John Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Date of Birth */}
+        <FormField
+          control={form.control}
+          name="dateOfBirth"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Birth</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Domicile */}
+        <FormField
+          control={form.control}
+          name="domicile"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Domicile</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your domicile" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dummyLocations.map((loc) => (
+                      <SelectItem key={loc} value={loc}>
+                        {loc}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Phone Number */}
+        <div className="grid grid-cols-3 gap-2">
           <FormField
             control={form.control}
-            name="jobName"
+            name="countryCode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Job Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Frontend Engineer" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="jobType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Job Type</FormLabel>
+                <FormLabel>Country</FormLabel>
                 <FormControl>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select job type" />
+                      <SelectValue placeholder="Country code" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Full-time">Full-time</SelectItem>
-                      <SelectItem value="Part-time">Part-time</SelectItem>
-                      <SelectItem value="Contract">Contract</SelectItem>
-                      <SelectItem value="Internship">Internship</SelectItem>
+                      {countryCodes.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.label} ({c.code})
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
 
           <FormField
             control={form.control}
-            name="jobDescription"
+            name="phoneNumber"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Job Description</FormLabel>
+              <FormItem className="col-span-2">
+                <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Describe job responsibilities..."
-                    {...field}
-                  />
+                  <Input type="tel" placeholder="8123456789" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <FormField
-            control={form.control}
-            name="numberOfCandidateNeeded"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Number of Candidates Needed</FormLabel>
-                <FormControl>
-                  <Input type="number" min="1" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Salary */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="minimumSalary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Minimum Salary</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder="8000000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="maximumSalary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Maximum Salary</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder="12000000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Profile Requirements */}
-          <div className="border p-4 rounded-lg">
-            <h2 className="text-lg font-semibold mb-4">
-              Minimum Profile Information Required
-            </h2>
-
-            <div className="grid gap-6">
-              {profileFields.map((fieldData) => (
-                <FormField
-                  key={fieldData.key}
-                  control={form.control}
-                  name={`minimumProfileInformationRequired.${fieldData.key}`}
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row justify-between items-center">
-                      <FormLabel>{fieldData.label}</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-2">
-                          {profileOptions.map((opt) => {
-                            const isSelected = field.value === opt.value;
-                            return (
-                              <Button
-                                key={opt.value}
-                                type="button"
-                                variant="outline"
-                                onClick={() => field.onChange(opt.value)}
-                                className={cn(
-                                  "rounded-full px-4 py-1 text-sm border transition-colors",
-                                  isSelected
-                                    ? "border-primary text-primary bg-white"
-                                    : "border-gray-300 text-gray-500 bg-gray-100 hover:bg-gray-200"
-                                )}
-                              >
-                                {opt.label}
-                              </Button>
-                            );
-                          })}
-                        </div>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              ))}
-            </div>
-          </div>
         </div>
-
-        <div className="h-px bg-neutral-30 mt-4"></div>
-
-        <div className="p-4">
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-fit font-semibold flex items-center ml-auto hover:bg-opacity-90"
-          >
-            {isPending ? "Menyimpan..." : "Publish Job"}
+        {/* Email */}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="example@email.com"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* LinkedIn */}
+        <FormField
+          control={form.control}
+          name="linkedinLink"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>LinkedIn Profile</FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  placeholder="https://linkedin.com/in/username"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Submit */}
+        <div className="pt-4 border-t">
+          <Button type="submit" className="ml-auto block">
+            Submit Application
           </Button>
         </div>
       </form>
