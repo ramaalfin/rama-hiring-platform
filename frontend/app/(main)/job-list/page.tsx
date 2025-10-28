@@ -1,14 +1,15 @@
 import React from "react";
 import { cookies } from "next/headers";
+import CandidateJobList from "../_components/JobList";
 
-const AdminJobListPage = () => {
+const JobListPage = () => {
   const token = cookies().get("accessToken")?.value;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Job List candidate</h1>
+      <CandidateJobList token={token!} />
     </div>
   );
 };
 
-export default AdminJobListPage;
+export default JobListPage;

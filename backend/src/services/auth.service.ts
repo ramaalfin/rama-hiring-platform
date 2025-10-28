@@ -95,7 +95,7 @@ export const createAccount = async (data: CreateAccountData) => {
   const accessToken = signToken({
     sessionId: session.id,
     userId: user.id,
-    role: user.role
+    role: user.role,
   });
 
   const { password: _, ...userWithoutPassword } = user;
@@ -132,7 +132,7 @@ export const loginUser = async ({
   const accessToken = signToken({
     ...sessionInfo,
     userId,
-    role: user.role
+    role: user.role,
   });
 
   return { user, refreshToken, accessToken };
@@ -175,7 +175,6 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
 };
 
 export const verifyEmail = async (code: string) => {
-
   const validCode = await prisma.verificationCode.findUnique({
     where: {
       id: code,
@@ -185,7 +184,6 @@ export const verifyEmail = async (code: string) => {
   });
 
   appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
-
 
   const updateUser = await prisma.user.update({
     where: { id: validCode.userId },
@@ -234,8 +232,9 @@ export const forgotPasswordService = async (email: string) => {
     },
   });
 
-  const url = `${APP_ORIGIN}/reset-password?code=${verificationCode.id
-    }&expiresAt=${expiresAt.getTime()}`;
+  const url = `${APP_ORIGIN}/reset-password?code=${
+    verificationCode.id
+  }&expiresAt=${expiresAt.getTime()}`;
 
   await sendForgotPasswordEmail(email, url);
 
@@ -248,7 +247,6 @@ export const resetPassword = async ({
   password,
   verificationCode,
 }: ResetPasswordData) => {
-
   const validCode = await prisma.verificationCode.findUnique({
     where: {
       id: verificationCode,
@@ -258,7 +256,6 @@ export const resetPassword = async ({
   });
 
   appAssert(validCode, NOT_FOUND, "Invalid or expired verification code");
-
 
   const updateUser = await prisma.user.update({
     where: { id: validCode.userId },
@@ -323,7 +320,11 @@ export const verifyMagicLoginService = async (code: string) => {
 
   const sessionInfo = { sessionId: session.id };
   const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
-  const accessToken = signToken({ ...sessionInfo, userId: user.id, role: user.role });
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId: user.id,
+    role: user.role,
+  });
 
   const { password: _, ...userWithoutPassword } = user;
   return { accessToken, refreshToken, user: userWithoutPassword };
@@ -341,7 +342,7 @@ export const sendMagicRegisterService = async (email: string) => {
       email,
       fullName: "",
       verified: false,
-      password
+      password,
     },
   });
 
@@ -384,7 +385,11 @@ export const verifyMagicRegisterService = async (code: string) => {
 
   const sessionInfo = { sessionId: session.id };
   const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
-  const accessToken = signToken({ ...sessionInfo, userId: user.id, role: user.role });
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId: user.id,
+    role: user.role,
+  });
 
   const { password: _, ...userWithoutPassword } = user;
 

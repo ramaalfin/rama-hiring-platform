@@ -18,31 +18,31 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-// const data = {
-//   jobs: [
-//     {
-//       id: "1",
-//       jobName: "Frontend Developer",
-//       minimumSalary: 8000000,
-//       maximumSalary: 15000000,
-//       createdAt: "2025-10-01T10:00:00Z",
-//     },
-//     {
-//       id: "2",
-//       jobName: "Backend Engineer",
-//       minimumSalary: 10000000,
-//       maximumSalary: 18000000,
-//       createdAt: "2025-09-25T09:30:00Z",
-//     },
-//     {
-//       id: "3",
-//       jobName: "UI/UX Designer",
-//       minimumSalary: 7000000,
-//       maximumSalary: 12000000,
-//       createdAt: "2025-10-05T14:00:00Z",
-//     },
-//   ],
-// };
+const data = {
+  jobs: [
+    {
+      id: "1",
+      jobName: "Frontend Developer",
+      minimumSalary: 8000000,
+      maximumSalary: 15000000,
+      createdAt: "2025-10-01T10:00:00Z",
+    },
+    {
+      id: "2",
+      jobName: "Backend Engineer",
+      minimumSalary: 10000000,
+      maximumSalary: 18000000,
+      createdAt: "2025-09-25T09:30:00Z",
+    },
+    {
+      id: "3",
+      jobName: "UI/UX Designer",
+      minimumSalary: 7000000,
+      maximumSalary: 12000000,
+      createdAt: "2025-10-05T14:00:00Z",
+    },
+  ],
+};
 
 const JobList = ({ token }: { token: string }) => {
   const user = useAuthStore((state) => state.user);
@@ -50,61 +50,61 @@ const JobList = ({ token }: { token: string }) => {
   const [sortBy, setSortBy] = useState("date-desc");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["adminJobs", user?.id],
-    queryFn: () => getAdminJobsFn(user!.id, token!),
-    enabled: !!user?.id && !!token,
-  });
+  // const { data, isLoading, isError, error } = useQuery({
+  //   queryKey: ["adminJobs", user?.id],
+  //   queryFn: () => getAdminJobsFn(user!.id, token!),
+  //   enabled: !!user?.id && !!token,
+  // });
 
   // const data = null;
-  // const isLoading = false;
-  // const isError = false;
-  // const error = null;
+  const isLoading = false;
+  const isError = false;
+  const error = null;
 
-  const filteredAndSortedJobs = useMemo(() => {
-    if (!data) return [];
+  // const filteredAndSortedJobs = useMemo(() => {
+  //   if (!data) return [];
 
-    let jobs = [...data];
+  //   let jobs = [...data];
 
-    // Filter by keyword
-    if (searchKeyword) {
-      const lowerKeyword = searchKeyword.toLowerCase();
-      jobs = jobs.filter(
-        (job: any) =>
-          job.jobName.toLowerCase().includes(lowerKeyword) ||
-          job.jobDescription?.toLowerCase().includes(lowerKeyword)
-      );
-    }
+  //   // Filter by keyword
+  //   if (searchKeyword) {
+  //     const lowerKeyword = searchKeyword.toLowerCase();
+  //     jobs = jobs.filter(
+  //       (job: any) =>
+  //         job.jobName.toLowerCase().includes(lowerKeyword) ||
+  //         job.jobDescription?.toLowerCase().includes(lowerKeyword)
+  //     );
+  //   }
 
-    // Filter by status
-    if (statusFilter !== "all") {
-      jobs = jobs.filter((job: any) => job.status === statusFilter);
-    }
+  //   // Filter by status
+  //   if (statusFilter !== "all") {
+  //     jobs = jobs.filter((job: any) => job.status === statusFilter);
+  //   }
 
-    // Sorting
-    switch (sortBy) {
-      case "date-asc":
-        jobs.sort(
-          (a: any, b: any) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        break;
-      case "date-desc":
-        jobs.sort(
-          (a: any, b: any) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        break;
-      case "min-salary":
-        jobs.sort((a: any, b: any) => a.minimumSalary - b.minimumSalary);
-        break;
-      case "max-salary":
-        jobs.sort((a: any, b: any) => b.maximumSalary - a.maximumSalary);
-        break;
-    }
+  //   // Sorting
+  //   switch (sortBy) {
+  //     case "date-asc":
+  //       jobs.sort(
+  //         (a: any, b: any) =>
+  //           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  //       );
+  //       break;
+  //     case "date-desc":
+  //       jobs.sort(
+  //         (a: any, b: any) =>
+  //           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  //       );
+  //       break;
+  //     case "min-salary":
+  //       jobs.sort((a: any, b: any) => a.minimumSalary - b.minimumSalary);
+  //       break;
+  //     case "max-salary":
+  //       jobs.sort((a: any, b: any) => b.maximumSalary - a.maximumSalary);
+  //       break;
+  //   }
 
-    return jobs;
-  }, [data, searchKeyword, sortBy, statusFilter]);
+  //   return jobs;
+  // }, [data, searchKeyword, sortBy, statusFilter]);
 
   if (isLoading)
     return <p className="text-center text-gray-500 mt-8">Loading jobs...</p>;
@@ -139,8 +139,8 @@ const JobList = ({ token }: { token: string }) => {
         </Select>
       </div>
       <div className="grid gap-4 mt-4">
-        {filteredAndSortedJobs.length > 0 &&
-          filteredAndSortedJobs.map((job: any) => (
+        {data.jobs.length > 0 &&
+          data.jobs.map((job: any) => (
             <div
               key={job.id}
               className="flex flex-col gap-2 rounded-xl p-4 transition shadow-md bg-white border border-neutral-200"
@@ -175,8 +175,8 @@ const JobList = ({ token }: { token: string }) => {
             </div>
           ))}
 
-        {!filteredAndSortedJobs ||
-          (filteredAndSortedJobs.length === 0 && (
+        {!data ||
+          (data.jobs.length === 0 && (
             <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
               <Image
                 src="/assets/illustration/Empty State.svg"

@@ -55,7 +55,6 @@ export const loginMutationFn = async (data: LoginType) => {
   return user;
 };
 
-
 export const magicLoginMutationFn = async (data: { email: string }) => {
   const response = await API.post("/auth/magic-login", data);
 
@@ -65,9 +64,13 @@ export const magicLoginMutationFn = async (data: { email: string }) => {
   // Simpan user ke Zustand
   const { setUser } = useAuthStore.getState();
   setUser(user);
-}
+};
 
-export const verifyMagicLoginMutationFn = async ({ code }: { code: string }) => {
+export const verifyMagicLoginMutationFn = async ({
+  code,
+}: {
+  code: string;
+}) => {
   const response = await API.get("/auth/magic-login/verify", {
     params: { code },
     headers: {
@@ -108,7 +111,11 @@ export const magicRegisterMutationFn = async (data: { email: string }) => {
   setUser(user);
 };
 
-export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) => {
+export const verifyMagicRegisterMutationFn = async ({
+  code,
+}: {
+  code: string;
+}) => {
   const response = await API.get("/auth/magic-register/verify", {
     params: { code },
     headers: {
@@ -124,7 +131,7 @@ export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) 
   setUser(user);
 
   return response.data;
-}
+};
 
 export const forgotPasswordMutationFn = async (data: ForgotPasswordType) => {
   await API.post("/auth/password/forgot", data);
@@ -185,7 +192,7 @@ export const getAllJobsQueryFn = async (token: string) => {
     },
   });
   return response.data;
-}
+};
 
 export const getAdminJobsFn = async (adminId: string, token: string) => {
   const response = await API.get(`/jobs/admin/${adminId}`, {
