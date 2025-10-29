@@ -55,7 +55,7 @@ export default function Login() {
   return (
     <main className="w-full h-full p-8 rounded-md" key={errorMessage}>
       <h1 className="text-xl font-bold mb-2 text-center sm:text-left">
-        Masuk ke Rakamin
+        Masuk ke Get Job
       </h1>
 
       <p className="mb-4 text-center sm:text-left text-base">

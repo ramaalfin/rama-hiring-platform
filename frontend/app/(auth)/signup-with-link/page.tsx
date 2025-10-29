@@ -53,7 +53,7 @@ export default function SignUp() {
   return (
     <main className="w-full h-full p-8 rounded-md">
       <h1 className="text-xl tracking-[-0.16px] font-bold mb-1.5 text-center sm:text-left text-neutral-1000">
-        Bergabung dengan Rakamin
+        Bergabung dengan Get Job
       </h1>
       <p className="mb-4 text-center sm:text-left text-base font-normal text-neutral-1000">
         Sudah punya akun?{" "}

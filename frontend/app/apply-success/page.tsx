@@ -17,7 +17,7 @@ export default function ApplySuccessPage() {
         </h1>
         <p className="text-neutral-90 text-sm mb-6">
           Congratulations! You've taken the first step towards a rewarding
-          career at Rakamin. We look forward to learning more about you during
+          career at GetJob. We look forward to learning more about you during
           the application process.
         </p>
         <Link href="/">

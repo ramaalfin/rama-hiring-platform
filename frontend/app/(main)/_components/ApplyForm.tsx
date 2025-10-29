@@ -74,8 +74,6 @@ export default function ApplyForm({
       router.push("/apply-success");
     },
     onError: (error: any) => {
-      console.log(error?.response?.data?.message);
-
       // Ambil message dari response API jika ada
       const message =
         error?.response?.data?.message ||

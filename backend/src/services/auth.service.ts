@@ -75,7 +75,6 @@ export const createAccount = async (data: CreateAccountData) => {
   try {
     await sendVerificationEmail(user.email, verifyCode);
   } catch (err) {
-    console.error("❌ Failed to send verification email:", err);
     throw new AppError(500, "Failed to send verification email");
   }
 
@@ -341,8 +340,7 @@ export const sendMagicRegisterService = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
   appAssert(!user, CONFLICT, "Email already registered");
 
-  // password awal adalah Rakamin12345
-  const password = await hashValue("Rakamin12345");
+  const password = await hashValue("User12345");
 
   const newUser = await prisma.user.create({
     data: {

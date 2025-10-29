@@ -93,16 +93,16 @@ export const sendForgotPasswordEmail = async (
 
 export const sendMagicLoginEmail = async (email: string, url: string) => {
   await transporter.sendMail({
-    from: `"Rakamin" <${GMAIL_USER}>`,
+    from: `"GetJob" <${GMAIL_USER}>`,
     to: email,
-    subject: "Masuk ke Rakamin",
+    subject: "Masuk ke GetJob",
     html: `
       <!DOCTYPE html>
       <html lang="id">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Masuk ke Rakamin</title>
+          <title>Masuk ke GetJob</title>
           <style>
               * { margin:0; padding:0; box-sizing:border-box; }
               body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color:#f5f5f5; padding:20px; }
@@ -139,8 +139,8 @@ export const sendMagicLoginEmail = async (email: string, url: string) => {
       <body>
           <div class="email-container">
               <div class="header">
-                  <img src="https://i.imgur.com/placeholder-logo.png" alt="Rakamin Logo" class="logo">
-                  <h1 class="title">Masuk ke Rakamin</h1>
+                  <img src="https://i.imgur.com/placeholder-logo.png" alt="GetJob Logo" class="logo">
+                  <h1 class="title">Masuk ke GetJob</h1>
               </div>
               
               <div class="divider"></div>
@@ -149,11 +149,11 @@ export const sendMagicLoginEmail = async (email: string, url: string) => {
                   <p class="greeting">Hai,</p>
                   <p class="message">
                       Berikut adalah <span class="link-text">link masuk</span> yang kamu request dari 
-                      <a href="https://www.rakamin.com" class="website-link">www.rakamin.com</a>
+                      <a href="https://www.getjob.com" class="website-link">www.getjob.com</a>
                   </p>
                   
                   <div class="button-container">
-                      <a href="${url}" class="login-button">Masuk ke Rakamin</a>
+                      <a href="${url}" class="login-button">Masuk ke GetJob</a>
                   </div>
                   
                   <p class="security-notice">
@@ -162,11 +162,11 @@ export const sendMagicLoginEmail = async (email: string, url: string) => {
               </div>
               
               <div class="footer">
-                  <p class="company-name">PT. Rakamin Kolektif Madan</p>
+                  <p class="company-name">PT. GetJob Kolektif Madan</p>
                   <p class="address">
                       Menara Caraka - Jl. Mega Kuningan Barat, Kuningan, Kecamatan Setiabudi, Jakarta Selatan, DKI Jakarta 12950
                   </p>
-                  <p class="copyright">© Rakamin 2025. All rights reserved</p>
+                  <p class="copyright">© GetJob 2025. All rights reserved</p>
               </div>
           </div>
       </body>
@@ -177,16 +177,16 @@ export const sendMagicLoginEmail = async (email: string, url: string) => {
 
 export const sendMagicRegisterEmail = async (email: string, url: string) => {
   await transporter.sendMail({
-    from: `"Rakamin" <${GMAIL_USER}>`,
+    from: `"GetJob" <${GMAIL_USER}>`,
     to: email,
-    subject: "Masuk ke Rakamin Rakamin",
+    subject: "Masuk ke GetJob GetJob",
     html: `
       <!DOCTYPE html>
       <html lang="id">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Masuk ke Rakamin Rakamin</title>
+          <title>Masuk ke GetJob GetJob</title>
           <style>
               * { margin:0; padding:0; box-sizing:border-box; }
               body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color:#f5f5f5; padding:20px; }
@@ -223,8 +223,8 @@ export const sendMagicRegisterEmail = async (email: string, url: string) => {
       <body>
           <div class="email-container">
               <div class="header">
-                  <img src="https://i.imgur.com/placeholder-logo.png" alt="Rakamin Logo" class="logo">
-                  <h1 class="title">Masuk ke Rakamin</h1>
+                  <img src="https://i.imgur.com/placeholder-logo.png" alt="GetJob Logo" class="logo">
+                  <h1 class="title">Masuk ke GetJob</h1>
               </div>
               
               <div class="divider"></div>
@@ -232,12 +232,12 @@ export const sendMagicRegisterEmail = async (email: string, url: string) => {
               <div class="content">
                   <p class="greeting">Hai,</p>
                   <p class="message">
-                      Kamu baru saja mendaftar di <a href="https://www.rakamin.com" class="website-link">www.rakamin.com</a>.  
+                      Kamu baru saja mendaftar di <a href="https://www.getjob.com" class="website-link">www.getjob.com</a>.  
                       Klik tombol di bawah untuk menyelesaikan proses pendaftaran dan masuk ke akunmu.
                   </p>
                   
                   <div class="button-container">
-                      <a href="${url}" class="login-button">Masuk ke Rakamin</a>
+                      <a href="${url}" class="login-button">Masuk ke GetJob</a>
                   </div>
                   
                   <p class="security-notice">
@@ -246,11 +246,11 @@ export const sendMagicRegisterEmail = async (email: string, url: string) => {
               </div>
               
               <div class="footer">
-                  <p class="company-name">PT. Rakamin Kolektif Madan</p>
+                  <p class="company-name">PT. GetJob Kolektif Madan</p>
                   <p class="address">
                       Menara Caraka - Jl. Mega Kuningan Barat, Kuningan, Kecamatan Setiabudi, Jakarta Selatan, DKI Jakarta 12950
                   </p>
-                  <p class="copyright">© Rakamin 2025. All rights reserved</p>
+                  <p class="copyright">© GetJob 2025. All rights reserved</p>
               </div>
           </div>
       </body>

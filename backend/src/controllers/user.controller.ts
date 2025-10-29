@@ -27,7 +27,6 @@ export const getUserController = catchErrors(async (req, res) => {
 
     return res.json({ user });
   } catch (error) {
-    console.error("Error in getUserController:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 });

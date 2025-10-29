@@ -88,7 +88,7 @@ const CandidateJobList = ({ token }: { token: string }) => {
                         width={50}
                         height={50}
                         src="/assets/logo/Logo.svg"
-                        alt="logo rakamin"
+                        alt="logo Get Job"
                         className="w-12"
                       />
                       <div className="flex flex-col">
@@ -128,7 +128,7 @@ const CandidateJobList = ({ token }: { token: string }) => {
                         width={50}
                         height={50}
                         src="/assets/logo/Logo.svg"
-                        alt="logo rakamin"
+                        alt="logo Get Job"
                         className="w-12"
                       />
                       <div className="flex flex-col space-y-1">

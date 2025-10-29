@@ -37,6 +37,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import LogoutDialog from "./_common/LogoutDialog";
 import { useTheme } from "next-themes";
 import { useAuthContext } from "@/context/auth-provider";
+import Logo from "@/components/logo";
 
 const Asidebar = () => {
   const { theme, setTheme } = useTheme();
@@ -90,13 +91,7 @@ const Asidebar = () => {
                 href="/home"
                 className="hidden md:flex ml-2 text-xl tracking-[-0.16px] text-black dark:text-[#fcfdffef] font-bold mb-0"
               >
-                <Image
-                  width={200}
-                  height={100}
-                  src="/assets/logo/Logo Rakamin.svg"
-                  alt="logo rakamin"
-                  className="w-28"
-                />
+                <Logo />
               </Link>
             )}
           </div>
