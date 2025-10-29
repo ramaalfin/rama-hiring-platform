@@ -4,6 +4,7 @@ import useAuth from "@/hooks/use-auth";
 import React, { createContext, useContext } from "react";
 
 type UserType = {
+  id: string;
   fullName: string;
   email: string;
   isEmailVerified: boolean;
@@ -13,7 +14,7 @@ type UserType = {
 };
 
 type AuthContextType = {
-  user?: UserType;
+  user?: UserType | null;
   error: any;
   isLoading: boolean;
   isFetching: boolean;
@@ -25,8 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { data, error, isLoading, isFetching, refetch } = useAuth();
-  const user = data?.data?.user;
+  const { data: user, error, isLoading, isFetching, refetch } = useAuth();
 
   return (
     <AuthContext.Provider
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuthContext must be used within a AuthProvider");
+    throw new Error("useAuthContext must be used within an AuthProvider");
   }
   return context;
 };

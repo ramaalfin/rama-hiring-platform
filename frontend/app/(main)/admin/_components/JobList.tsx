@@ -1,15 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { getAdminJobsFn, getAllJobsQueryFn } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { format } from "date-fns";
-import Image from "next/image";
-import JobFormModal from "./JobFormModal";
-import { useAuthStore } from "@/stores/authStore";
 import { Input } from "@/components/ui/input";
-import { useMemo, useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -17,96 +9,70 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-
-const data = {
-  jobs: [
-    {
-      id: "1",
-      jobName: "Frontend Developer",
-      minimumSalary: 8000000,
-      maximumSalary: 15000000,
-      createdAt: "2025-10-01T10:00:00Z",
-    },
-    {
-      id: "2",
-      jobName: "Backend Engineer",
-      minimumSalary: 10000000,
-      maximumSalary: 18000000,
-      createdAt: "2025-09-25T09:30:00Z",
-    },
-    {
-      id: "3",
-      jobName: "UI/UX Designer",
-      minimumSalary: 7000000,
-      maximumSalary: 12000000,
-      createdAt: "2025-10-05T14:00:00Z",
-    },
-  ],
-};
+import { getAdminJobsFn } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import Link from "next/link";
+import Image from "next/image";
+import { useMemo, useState } from "react";
+import JobFormModal from "./JobFormModal";
+import { useAuthContext } from "@/context/auth-provider";
 
 const JobList = ({ token }: { token: string }) => {
-  const user = useAuthStore((state) => state.user);
+  const { user, isLoading: isUserLoading } = useAuthContext();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortBy, setSortBy] = useState("date-desc");
-  const [statusFilter, setStatusFilter] = useState("all");
 
-  // const { data, isLoading, isError, error } = useQuery({
-  //   queryKey: ["adminJobs", user?.id],
-  //   queryFn: () => getAdminJobsFn(user!.id, token!),
-  //   enabled: !!user?.id && !!token,
-  // });
+  // Ambil data pekerjaan milik admin
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["adminJobs", user?.email],
+    queryFn: () => getAdminJobsFn(user!.id, token!),
+    enabled: !!user?.id && !!token && !isUserLoading,
+    refetchOnMount: "always",
+  });
 
-  // const data = null;
-  const isLoading = false;
-  const isError = false;
-  const error = null;
+  const filteredAndSortedJobs = useMemo(() => {
+    if (!data) return [];
 
-  // const filteredAndSortedJobs = useMemo(() => {
-  //   if (!data) return [];
+    let jobs = [...data];
 
-  //   let jobs = [...data];
+    // Filter berdasarkan keyword
+    if (searchKeyword) {
+      const lowerKeyword = searchKeyword.toLowerCase();
+      jobs = jobs.filter(
+        (job: any) =>
+          job.jobName.toLowerCase().includes(lowerKeyword) ||
+          job.jobDescription?.toLowerCase().includes(lowerKeyword)
+      );
+    }
 
-  //   // Filter by keyword
-  //   if (searchKeyword) {
-  //     const lowerKeyword = searchKeyword.toLowerCase();
-  //     jobs = jobs.filter(
-  //       (job: any) =>
-  //         job.jobName.toLowerCase().includes(lowerKeyword) ||
-  //         job.jobDescription?.toLowerCase().includes(lowerKeyword)
-  //     );
-  //   }
+    // Urutkan berdasarkan kriteria
+    switch (sortBy) {
+      case "date-asc":
+        jobs.sort(
+          (a: any, b: any) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+        break;
+      case "date-desc":
+        jobs.sort(
+          (a: any, b: any) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      case "min-salary":
+        jobs.sort((a: any, b: any) => a.minimumSalary - b.minimumSalary);
+        break;
+      case "max-salary":
+        jobs.sort((a: any, b: any) => b.maximumSalary - a.maximumSalary);
+        break;
+    }
 
-  //   // Filter by status
-  //   if (statusFilter !== "all") {
-  //     jobs = jobs.filter((job: any) => job.status === statusFilter);
-  //   }
+    return jobs;
+  }, [data, searchKeyword, sortBy]);
 
-  //   // Sorting
-  //   switch (sortBy) {
-  //     case "date-asc":
-  //       jobs.sort(
-  //         (a: any, b: any) =>
-  //           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-  //       );
-  //       break;
-  //     case "date-desc":
-  //       jobs.sort(
-  //         (a: any, b: any) =>
-  //           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  //       );
-  //       break;
-  //     case "min-salary":
-  //       jobs.sort((a: any, b: any) => a.minimumSalary - b.minimumSalary);
-  //       break;
-  //     case "max-salary":
-  //       jobs.sort((a: any, b: any) => b.maximumSalary - a.maximumSalary);
-  //       break;
-  //   }
-
-  //   return jobs;
-  // }, [data, searchKeyword, sortBy, statusFilter]);
-
-  if (isLoading)
+  // Loading state (user / data)
+  if (isUserLoading || isLoading)
     return <p className="text-center text-gray-500 mt-8">Loading jobs...</p>;
 
   if (isError)
@@ -118,6 +84,7 @@ const JobList = ({ token }: { token: string }) => {
 
   return (
     <div className="space-y-4">
+      {/* Filter dan Sort */}
       <div className="flex flex-col sm:flex-row gap-3 items-center">
         <Input
           placeholder="Search by job title or description"
@@ -138,9 +105,11 @@ const JobList = ({ token }: { token: string }) => {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Daftar Job */}
       <div className="grid gap-4 mt-4">
-        {data.jobs.length > 0 &&
-          data.jobs.map((job: any) => (
+        {filteredAndSortedJobs.length > 0 &&
+          filteredAndSortedJobs.map((job: any) => (
             <div
               key={job.id}
               className="flex flex-col gap-2 rounded-xl p-4 transition shadow-md bg-white border border-neutral-200"
@@ -159,11 +128,12 @@ const JobList = ({ token }: { token: string }) => {
                     {job.jobName}
                   </h3>
                   <p className="text-sm text-neutral-600">
-                    {job.minimumSalary} - {job.maximumSalary}
+                    Rp{job.minimumSalary.toLocaleString()} – Rp
+                    {job.maximumSalary.toLocaleString()}
                   </p>
                 </div>
 
-                <Link href={`/admin/job-list/${job.jobName}`}>
+                <Link href={`/admin/job-list/${job.id}`}>
                   <Button
                     variant="default"
                     className="bg-primary text-white hover:bg-opacity-90"
@@ -175,26 +145,26 @@ const JobList = ({ token }: { token: string }) => {
             </div>
           ))}
 
-        {!data ||
-          (data.jobs.length === 0 && (
-            <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
-              <Image
-                src="/assets/illustration/Empty State.svg"
-                alt="No Data"
-                width={1200}
-                height={800}
-                className="size-60 object-contain"
-              />
-              <h2 className="text-lg font-semibold text-neutral-90">
-                No job openings available
-              </h2>
-              <p className="text-neutral-90">
-                Create a job opening now and start the candidate process.
-              </p>
+        {/* Empty State */}
+        {(!data || filteredAndSortedJobs.length === 0) && (
+          <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-4">
+            <Image
+              src="/assets/illustration/Empty State.svg"
+              alt="No Data"
+              width={1200}
+              height={800}
+              className="size-60 object-contain"
+            />
+            <h2 className="text-lg font-semibold text-neutral-900">
+              No job openings available
+            </h2>
+            <p className="text-neutral-700">
+              Create a job opening now and start the candidate process.
+            </p>
 
-              <JobFormModal token={token!} bgColor="bg-secondary" />
-            </div>
-          ))}
+            <JobFormModal token={token!} bgColor="bg-secondary" user={user!} />
+          </div>
+        )}
       </div>
     </div>
   );

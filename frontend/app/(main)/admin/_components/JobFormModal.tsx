@@ -15,10 +15,12 @@ export default function JobFormModal({
   token,
   bgColor = "bg-primary",
   color = "text-black",
+  user,
 }: {
   token?: string;
   bgColor?: string;
   color?: string;
+  user?: any;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -38,7 +40,7 @@ export default function JobFormModal({
           <DialogTitle>Job Opening</DialogTitle>
         </DialogHeader>
 
-        <JobForm token={token} onSuccess={() => setOpen(false)} />
+        <JobForm token={token} onSuccess={() => setOpen(false)} user={user} />
       </DialogContent>
     </Dialog>
   );

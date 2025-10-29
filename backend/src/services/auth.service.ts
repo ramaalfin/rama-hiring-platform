@@ -148,6 +148,7 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   const session = await prisma.session.findUnique({
     where: { id: payload.sessionId },
   });
+
   const now = Date.now();
   appAssert(
     session && session.expiresAt && session.expiresAt > new Date(now),
@@ -155,8 +156,13 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
     "Session expired"
   );
 
-  const sessionNeedRefresh = session.expiresAt.getTime() - now <= ONE_DAY_MS;
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+  });
 
+  appAssert(user, UNAUTHORIZED, "User not found");
+
+  const sessionNeedRefresh = session.expiresAt.getTime() - now <= ONE_DAY_MS;
   if (sessionNeedRefresh) {
     session.expiresAt = oneYearFromNow();
   }
@@ -165,14 +171,16 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
     ? signToken({ sessionId: session.id }, refreshTokenSignOptions)
     : undefined;
 
+  // ✅ Gunakan role dari database
   const accessToken = signToken({
     sessionId: session.id,
     userId: session.userId,
-    role: payload.role,
+    role: user.role,
   });
 
   return { accessToken, newRefreshToken };
 };
+
 
 export const verifyEmail = async (code: string) => {
   const validCode = await prisma.verificationCode.findUnique({
@@ -232,9 +240,8 @@ export const forgotPasswordService = async (email: string) => {
     },
   });
 
-  const url = `${APP_ORIGIN}/reset-password?code=${
-    verificationCode.id
-  }&expiresAt=${expiresAt.getTime()}`;
+  const url = `${APP_ORIGIN}/reset-password?code=${verificationCode.id
+    }&expiresAt=${expiresAt.getTime()}`;
 
   await sendForgotPasswordEmail(email, url);
 

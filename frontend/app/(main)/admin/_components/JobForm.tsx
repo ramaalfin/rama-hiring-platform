@@ -23,23 +23,36 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { createJobMutationFn } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
 export default function JobForm({
   token,
   onSuccess,
+  user,
 }: {
   token?: string;
   onSuccess?: () => void;
+  user?: any;
 }) {
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: (data: JobFormValues) => createJobMutationFn(data, token!),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Success",
         description: "Job berhasil dibuat!",
       });
+
+      // Pastikan invalidasi dan refetch benar-benar selesai
+      await queryClient.invalidateQueries({
+        queryKey: ["adminJobs", user?.id],
+      });
+
+      await queryClient.refetchQueries({
+        queryKey: ["adminJobs", user?.id],
+      });
+
       form.reset();
       onSuccess?.();
     },
@@ -54,6 +67,7 @@ export default function JobForm({
 
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobSchema),
+    mode: "onChange",
     defaultValues: {
       jobName: "",
       jobType: "",
@@ -142,7 +156,7 @@ export default function JobForm({
             name="jobDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Job Description</FormLabel>
+                <FormLabel>Job Description (min. 10 karakter)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Describe job responsibilities..."
@@ -249,8 +263,15 @@ export default function JobForm({
         <div className="p-4">
           <Button
             type="submit"
-            disabled={isPending}
-            className="w-fit font-semibold flex items-center ml-auto hover:bg-opacity-90"
+            disabled={
+              isPending || !form.formState.isValid || !form.formState.isDirty
+            }
+            className={cn(
+              "w-fit font-semibold flex items-center ml-auto hover:bg-opacity-90",
+              isPending || !form.formState.isValid || !form.formState.isDirty
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            )}
           >
             {isPending ? "Menyimpan..." : "Publish Job"}
           </Button>

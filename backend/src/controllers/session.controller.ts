@@ -42,6 +42,7 @@ export const getSessionController = catchErrors(async (req, res) => {
       id: true,
       email: true,
       fullName: true,
+      role: true
     },
   });
 

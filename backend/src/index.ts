@@ -10,6 +10,7 @@ import authenticate from "./middleware/authenticate";
 import userRoutes from "./routes/user.route";
 import sessionRoutes from "./routes/session.route";
 import jobsRoutes from "./routes/jobs.route";
+import applicationsRoutes from "./routes/applicant.route";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", authenticate, userRoutes);
 app.use("/api/v1/sessions", authenticate, sessionRoutes);
 app.use("/api/v1/jobs", authenticate, jobsRoutes);
+app.use("/api/v1/applications", authenticate, applicationsRoutes);
 
 app.use(errorHandler);
 

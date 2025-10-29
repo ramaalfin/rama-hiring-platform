@@ -15,14 +15,18 @@ export default function ApplyFormModal({
   token,
   bgColor = "bg-primary",
   color = "text-black",
+  jobId,
   jobName,
   companyName,
+  profileRequirements,
 }: {
   token?: string;
   bgColor?: string;
   color?: string;
+  jobId: string;
   jobName?: string;
   companyName?: string;
+  profileRequirements?: {};
 }) {
   const [open, setOpen] = useState(false);
 
@@ -39,12 +43,14 @@ export default function ApplyFormModal({
 
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
         <DialogHeader className="p-4 border-b">
-          <DialogTitle>
-            Apply {jobName} at {companyName}
-          </DialogTitle>
+          <DialogTitle>Apply {jobName}</DialogTitle>
         </DialogHeader>
 
-        <ApplyForm token={token} onSuccess={() => setOpen(false)} />
+        <ApplyForm
+          jobId={jobId}
+          token={token}
+          profileRequirements={profileRequirements}
+        />
       </DialogContent>
     </Dialog>
   );

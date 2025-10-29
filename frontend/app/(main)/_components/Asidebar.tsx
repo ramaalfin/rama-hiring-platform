@@ -11,6 +11,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Sidebar,
   SidebarHeader,
@@ -35,23 +36,18 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import LogoutDialog from "./_common/LogoutDialog";
 import { useTheme } from "next-themes";
-import { useAuthStore } from "@/stores/authStore";
-import Image from "next/image";
+import { useAuthContext } from "@/context/auth-provider";
 
 const Asidebar = () => {
   const { theme, setTheme } = useTheme();
-  const user = useAuthStore((state) => state.user);
+  const { user, isLoading } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const { open } = useSidebar();
-
-  // dummy role
-  // const role = "ADMIN";
 
   const items = useMemo(() => {
     if (!user?.role) return [];
 
     if (user.role === "ADMIN") {
-      // if (role === "ADMIN") {
       return [
         {
           title: "Home",
@@ -67,7 +63,6 @@ const Asidebar = () => {
     }
 
     if (user.role === "CANDIDATE") {
-      // if (role === "CANDIDATE") {
       return [
         {
           title: "Home",
@@ -84,7 +79,6 @@ const Asidebar = () => {
 
     return [];
   }, [user?.role]);
-  // }, [role]);
 
   return (
     <>
@@ -112,7 +106,7 @@ const Asidebar = () => {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {!user ? (
+                {isLoading ? (
                   <Loader className="animate-spin place-self-center my-4" />
                 ) : (
                   items.map((item) => (
@@ -134,7 +128,7 @@ const Asidebar = () => {
         <SidebarFooter className="dark:bg-background">
           <SidebarMenu>
             <SidebarMenuItem>
-              {!user ? (
+              {isLoading || !user ? (
                 <Loader className="animate-spin place-self-center self-center" />
               ) : (
                 <DropdownMenu>

@@ -1,40 +1,53 @@
+// lib/axios-client.ts
 import axios from "axios";
 
-const options = {
+// --- axios utama untuk semua request user ---
+const API = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  withCredentials: true,
+  withCredentials: true, // ⬅️ penting agar cookie HttpOnly dikirim & diterima
   timeout: 10000,
-};
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-const API = axios.create(options);
+// --- axios khusus untuk refresh token ---
+const APIRefresh = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  withCredentials: true, // ⬅️ wajib juga
+});
 
-export const APIRefresh = axios.create(options);
-APIRefresh.interceptors.response.use((response) => response);
-
-// Interceptor: hanya jalankan logic refresh untuk 401 jika
-// request TIDAK memiliki header 'x-skip-refresh'
+// --- Interceptor utama ---
 API.interceptors.response.use(
-  (response) => response,
-
+  (res) => res,
   async (error) => {
-    if (!error.response) {
-      return Promise.reject(error);
-    }
+    const originalRequest = error.config;
 
-    const { data, status } = error.response;
+    // Tambahan: jika request tidak punya config (kadang di network error)
+    if (!originalRequest) return Promise.reject(error);
 
-    // Jika request punya header x-skip-refresh, jangan lakukan retry/refresh
-    const skipRefresh =
-      error.config && error.config.headers && error.config.headers["x-skip-refresh"];
+    // Hindari infinite loop refresh
+    const skipRefresh = originalRequest.headers["x-skip-refresh"];
+    const isUnauthorized = error.response?.status === 401;
 
-    if (status === 401 && !skipRefresh) {
+    if (isUnauthorized && !skipRefresh && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
-        await APIRefresh.get("/auth/refresh");
-        // ulangi request awal (perhatikan: APIRefresh tidak memiliki interceptor retry)
-        return APIRefresh(error.config);
+        // Coba refresh token
+        await APIRefresh.get("/auth/refresh", {
+          headers: {
+            "x-skip-refresh": "1", // hindari trigger infinite refresh
+          },
+        });
+
+        // Jika refresh berhasil, ulang request awal
+        return API(originalRequest);
       } catch (err) {
-        // jika gagal refresh, arahkan ke root (atau halaman login)
-        window.location.href = "/";
+        // Jika refresh gagal, redirect ke halaman login
+        if (typeof window !== "undefined") {
+          window.location.href = "/";
+        }
         return Promise.reject(err);
       }
     }

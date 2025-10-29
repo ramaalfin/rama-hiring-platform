@@ -74,8 +74,6 @@ export const loginController = catchErrors(async (req, res) => {
   });
 });
 
-
-
 export const sendMagicLoginController = catchErrors(async (req, res) => {
   const email = emailSchema.parse(req.body.email);
   await sendMagicLoginService(email);

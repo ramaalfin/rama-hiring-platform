@@ -1,149 +1,123 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getAllJobsQueryFn } from "@/lib/api";
 import ApplyFormModal from "./ApplyFormModal";
+import { format } from "date-fns";
 
-const dummyData = {
-  jobs: [
-    {
-      id: "1",
-      jobName: "Frontend Developer",
-      companyName: "Astra",
-      location: "Jakarta Selatan",
-      jobType: "Full-Time",
-      minimumSalary: 8000000,
-      maximumSalary: 15000000,
-      createdAt: "2025-10-01T10:00:00Z",
-      jobDescription: [
-        "Develop, test, and maintain responsive, high-performance web applications using modern front-end technologies.",
-        "Collaborate with UI/UX designers to translate wireframes and prototypes into functional code.",
-        "Integrate front-end components with APIs and backend services.",
-        "Ensure cross-browser compatibility and optimize applications for maximum speed and scalability.",
-      ],
-    },
-    {
-      id: "2",
-      jobName: "Backend Engineer",
-      companyName: "Telkom Indonesia",
-      location: "Bandung",
-      jobType: "Full-Time",
-      minimumSalary: 10000000,
-      maximumSalary: 18000000,
-      createdAt: "2025-09-25T09:30:00Z",
-      jobDescription: [
-        "Design and maintain scalable APIs.",
-        "Implement secure and optimized backend logic.",
-        "Collaborate with frontend engineers to ensure seamless integration.",
-      ],
-    },
-    {
-      id: "3",
-      jobName: "UI/UX Designer",
-      companyName: "Tokopedia",
-      location: "Jakarta Pusat",
-      jobType: "Contract",
-      minimumSalary: 7000000,
-      maximumSalary: 12000000,
-      createdAt: "2025-10-05T14:00:00Z",
-      jobDescription: [
-        "Design user-centered interfaces and prototypes.",
-        "Conduct usability testing and gather feedback.",
-        "Work closely with developers to ensure accurate design implementation.",
-      ],
-    },
-    {
-      id: "4",
-      jobName: "UI/UX Designer",
-      companyName: "Tokopedia",
-      location: "Jakarta Pusat",
-      jobType: "Contract",
-      minimumSalary: 7000000,
-      maximumSalary: 12000000,
-      createdAt: "2025-10-05T14:00:00Z",
-      jobDescription: [
-        "Design user-centered interfaces and prototypes.",
-        "Conduct usability testing and gather feedback.",
-        "Work closely with developers to ensure accurate design implementation.",
-      ],
-    },
-    {
-      id: "5",
-      jobName: "UI/UX Designer",
-      companyName: "Tokopedia",
-      location: "Jakarta Pusat",
-      jobType: "Contract",
-      minimumSalary: 7000000,
-      maximumSalary: 12000000,
-      createdAt: "2025-10-05T14:00:00Z",
-      jobDescription: [
-        "Design user-centered interfaces and prototypes.",
-        "Conduct usability testing and gather feedback.",
-        "Work closely with developers to ensure accurate design implementation.",
-      ],
-    },
-  ],
-};
+interface Job {
+  id: string;
+  jobName: string;
+  jobType: string;
+  jobDescription: string;
+  numberOfCandidateNeeded: number;
+  minimumSalary: string;
+  maximumSalary: string;
+  createdAt: string;
+  createdByUser: {
+    email: string;
+  };
+  minimumProfileInformationRequired: any;
+}
 
 const CandidateJobList = ({ token }: { token: string }) => {
-  const [selectedJob, setSelectedJob] = useState(dummyData.jobs[0]);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["jobs"],
+    queryFn: () => getAllJobsQueryFn(token),
+    enabled: !!token,
+  });
+
+  const jobs: Job[] = data?.data ?? [];
+
+  const filteredJobs = useMemo(() => {
+    if (!jobs) return [];
+    if (!searchKeyword) return jobs;
+    const keyword = searchKeyword.toLowerCase();
+    return jobs.filter(
+      (job) =>
+        job.jobName.toLowerCase().includes(keyword) ||
+        job.jobDescription.toLowerCase().includes(keyword)
+    );
+  }, [jobs, searchKeyword]);
+
+  const handleSelectJob = (job: Job) => setSelectedJob(job);
+
+  if (isLoading)
+    return <p className="text-center text-gray-500 mt-8">Loading jobs...</p>;
+  if (isError)
+    return (
+      <p className="text-center text-red-500 mt-8">
+        Error: {(error as Error).message}
+      </p>
+    );
 
   return (
     <div className="space-y-4">
-      {dummyData.jobs.length > 0 && (
+      <Input
+        placeholder="Search for jobs..."
+        value={searchKeyword}
+        onChange={(e) => setSearchKeyword(e.target.value)}
+        className="w-full sm:w-1/2"
+      />
+
+      {filteredJobs.length > 0 ? (
         <div className="grid grid-cols-5 gap-4 mt-4">
-          {/* --- Left Section: List of Jobs --- */}{" "}
+          {/* LEFT SECTION - Job List */}
           <div className="col-span-2 space-y-2 overflow-y-auto max-h-[80vh] pr-2">
-            {dummyData.jobs.map((job) => {
+            {filteredJobs.map((job) => {
               const isActive = selectedJob?.id === job.id;
               return (
                 <div
                   key={job.id}
-                  onClick={() => setSelectedJob(job)}
+                  onClick={() => handleSelectJob(job)}
                   className={`flex flex-col gap-2 rounded-xl p-4 cursor-pointer transition shadow-md ${
                     isActive
                       ? "bg-[#F7FEFF] border border-primary"
                       : "bg-white border border-neutral-200 hover:bg-gray-50"
                   }`}
                 >
-                  {" "}
                   <div className="space-y-2 flex flex-col">
-                    {" "}
                     <div className="flex flex-row gap-4 items-start">
-                      {" "}
                       <Image
                         width={50}
                         height={50}
                         src="/assets/logo/Logo.svg"
                         alt="logo rakamin"
                         className="w-12"
-                      />{" "}
+                      />
                       <div className="flex flex-col">
-                        {" "}
                         <h3 className="font-semibold text-neutral-800">
-                          {job.jobName}{" "}
-                        </h3>{" "}
+                          {job.jobName}
+                        </h3>
                         <p className="text-sm text-neutral-600">
-                          {job.companyName}{" "}
-                        </p>{" "}
-                      </div>{" "}
+                          {job.createdByUser?.email || "Company Unknown"}
+                        </p>
+                      </div>
                     </div>
                     <div className="h-px my-6 border-dashed border border-neutral-40"></div>
                     <span className="text-neutral-90 text-sm">
-                      {job.location}
+                      {job.jobType}
                     </span>
                     <span className="text-neutral-90 text-sm">
-                      Rp{job.minimumSalary.toLocaleString()} - Rp
-                      {job.maximumSalary.toLocaleString()}
+                      Rp{parseInt(job.minimumSalary).toLocaleString()} - Rp
+                      {parseInt(job.maximumSalary).toLocaleString()}
                     </span>
+                    <p className="text-xs text-neutral-500">
+                      Posted on {format(new Date(job.createdAt), "d MMM yyyy")}
+                    </p>
                   </div>
                 </div>
               );
             })}
           </div>
-          {/* --- Right Section: Job Detail --- */}
+
+          {/* RIGHT SECTION - Job Detail */}
           <div className="col-span-3 border border-neutral-40 p-4 rounded-lg bg-white">
             {selectedJob ? (
               <>
@@ -167,7 +141,7 @@ const CandidateJobList = ({ token }: { token: string }) => {
                           {selectedJob.jobName}
                         </h3>
                         <p className="text-sm text-neutral-600">
-                          {selectedJob.companyName}
+                          {selectedJob.createdByUser?.email || "Company"}
                         </p>
                       </div>
                     </div>
@@ -176,44 +150,45 @@ const CandidateJobList = ({ token }: { token: string }) => {
                   <ApplyFormModal
                     token={token!}
                     bgColor="bg-secondary"
+                    jobId={selectedJob?.id}
                     jobName={selectedJob?.jobName}
-                    companyName={selectedJob?.companyName}
+                    companyName={selectedJob?.createdByUser?.email}
+                    profileRequirements={
+                      selectedJob?.minimumProfileInformationRequired
+                    }
                   />
                 </div>
 
                 <div className="h-px my-4 bg-neutral-40"></div>
 
-                <ul className="list-disc pl-4 space-y-2">
-                  {selectedJob.jobDescription.map((desc, i) => (
-                    <li key={i} className="text-neutral-90 text-sm">
-                      {desc}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-neutral-90 text-sm whitespace-pre-line">
+                  {selectedJob.jobDescription}
+                </p>
               </>
-            ) : null}
+            ) : (
+              <p className="text-neutral-600 text-sm">
+                Select a job to view details.
+              </p>
+            )}
           </div>
         </div>
+      ) : (
+        <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
+          <Image
+            src="/assets/illustration/Empty State.svg"
+            alt="No Data"
+            width={1200}
+            height={800}
+            className="size-60 object-contain"
+          />
+          <h2 className="text-lg font-semibold text-neutral-90">
+            No job openings available
+          </h2>
+          <p className="text-neutral-90">
+            Create a job opening now and start the candidate process.
+          </p>
+        </div>
       )}
-
-      {!dummyData ||
-        (dummyData?.jobs.length === 0 && (
-          <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
-            <Image
-              src="/assets/illustration/Empty State.svg"
-              alt="No Data"
-              width={1200}
-              height={800}
-              className="size-60 object-contain"
-            />
-            <h2 className="text-lg font-semibold text-neutral-90">
-              No job openings available
-            </h2>
-            <p className="text-neutral-90">
-              Create a job opening now and start the candidate process.
-            </p>
-          </div>
-        ))}
     </div>
   );
 };

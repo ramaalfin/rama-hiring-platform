@@ -2,11 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectItem,
   SelectTrigger,
   SelectContent,
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -20,6 +22,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { getApplicationsByAdminFn } from "@/lib/api";
+import { formatPhoneNumber } from "@/utils/formatPhoneNumber";
+import { formatDate } from "@/utils/formatDate";
 
 interface Candidate {
   id: string;
@@ -30,126 +35,52 @@ interface Candidate {
   phoneNumber: string;
   linkedinLink: string;
   dateOfBirth: string;
+  jobId: string;
+  jobName: string;
+  createdAt: string;
+  resume: any;
+  applicant: any;
 }
-
-const dummyCandidates: Candidate[] = [
-  {
-    id: "1",
-    fullName: "Alfin Rama",
-    gender: "Male",
-    domicile: "Jakarta",
-    email: "alfin@example.com",
-    phoneNumber: "08123456789",
-    linkedinLink: "https://linkedin.com/in/alfin",
-    dateOfBirth: "1998-06-20",
-  },
-  {
-    id: "2",
-    fullName: "Siti Aisyah",
-    gender: "Female",
-    domicile: "Bandung",
-    email: "aisyah@example.com",
-    phoneNumber: "08121234567",
-    linkedinLink: "https://linkedin.com/in/aisyah",
-    dateOfBirth: "1996-03-11",
-  },
-  {
-    id: "3",
-    fullName: "Rizky Maulana",
-    gender: "Male",
-    domicile: "Surabaya",
-    email: "rizky@example.com",
-    phoneNumber: "0813332211",
-    linkedinLink: "https://linkedin.com/in/rizky",
-    dateOfBirth: "1999-09-09",
-  },
-  {
-    id: "4",
-    fullName: "Rizky Maulana",
-    gender: "Male",
-    domicile: "Surabaya",
-    email: "rizky@example.com",
-    phoneNumber: "0813332211",
-    linkedinLink: "https://linkedin.com/in/rizky",
-    dateOfBirth: "1999-09-09",
-  },
-  {
-    id: "5",
-    fullName: "Rizky Maulana",
-    gender: "Male",
-    domicile: "Surabaya",
-    email: "rizky@example.com",
-    phoneNumber: "0813332211",
-    linkedinLink: "https://linkedin.com/in/rizky",
-    dateOfBirth: "1999-09-09",
-  },
-  {
-    id: "6",
-    fullName: "Rizky Maulana",
-    gender: "Male",
-    domicile: "Surabaya",
-    email: "rizky@example.com",
-    phoneNumber: "0813332211",
-    linkedinLink: "https://linkedin.com/in/rizky",
-    dateOfBirth: "1999-09-09",
-  },
-  {
-    id: "7",
-    fullName: "Rizky Maulana",
-    gender: "Male",
-    domicile: "Surabaya",
-    email: "rizky@example.com",
-    phoneNumber: "0813332211",
-    linkedinLink: "https://linkedin.com/in/rizky",
-    dateOfBirth: "1999-09-09",
-  },
-];
 
 export default function DetailJob({ token }: { token?: string }) {
   const pathname = usePathname();
   const pathSegments = pathname.split("/").filter(Boolean);
-  const lastSegment = pathSegments.pop();
-
-  // Decode URL-encoded chars (misal %20 jadi spasi)
-  const decodedSegment = lastSegment ? decodeURIComponent(lastSegment) : "";
-
-  // Ubah format: ganti underscore/dash jadi spasi dan kapitalisasi awal kata
-  const formattedSegment = decodedSegment
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  const adminId = pathSegments[pathSegments.length - 1];
 
   const [search, setSearch] = useState("");
-  const [genderFilter, setGenderFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<keyof Candidate>("fullName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [dateSortOrder, setDateSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const limit = 5;
 
-  // ---- Filtered & Sorted data ----
+  const { data: candidates = [], isLoading } = useQuery({
+    queryKey: ["adminApplications", adminId],
+    queryFn: () => getApplicationsByAdminFn(adminId!, token!),
+  });
+
   const filteredData = useMemo(() => {
-    let data = dummyCandidates;
+    let data = candidates;
 
-    // Filter by gender
-    if (genderFilter !== "all") {
-      data = data.filter((item) => item.gender === genderFilter);
-    }
-
-    // Search
+    // search filter
     if (search) {
       const keyword = search.toLowerCase();
-      data = data.filter(
-        (item) =>
-          item.fullName.toLowerCase().includes(keyword) ||
-          item.email.toLowerCase().includes(keyword) ||
-          item.domicile.toLowerCase().includes(keyword)
+      data = data.filter((item: any) =>
+        item.applicant.fullName.toLowerCase().includes(keyword)
       );
     }
 
-    // Sorting
+    // sort
     data = [...data].sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
+      if (sortField === "createdAt") {
+        const aDate = new Date(a.createdAt).getTime();
+        const bDate = new Date(b.createdAt).getTime();
+        return dateSortOrder === "asc" ? aDate - bDate : bDate - aDate;
+      }
+
+      const aVal = a.applicant[sortField];
+      const bVal = b.applicant[sortField];
       if (typeof aVal === "string" && typeof bVal === "string") {
         return sortOrder === "asc"
           ? aVal.localeCompare(bVal)
@@ -159,26 +90,19 @@ export default function DetailJob({ token }: { token?: string }) {
     });
 
     return data;
-  }, [search, genderFilter, sortField, sortOrder]);
+  }, [candidates, search, sortField, sortOrder, dateSortOrder]);
 
-  // ---- Pagination ----
+  // pagination
   const totalPages = Math.ceil(filteredData.length / limit);
   const paginatedData = filteredData.slice((page - 1) * limit, page * limit);
 
-  // ---- Toggle sorting ----
-  const handleSort = (field: keyof Candidate) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
+  const allSelected =
+    paginatedData.length > 0 &&
+    paginatedData.every((item: any) => selectedIds.includes(item.applicant.id));
 
-  // ---- Checkbox handlers ----
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(paginatedData.map((item) => item.id));
+      setSelectedIds(paginatedData.map((item: any) => item.applicant.id));
     } else {
       setSelectedIds([]);
     }
@@ -190,17 +114,35 @@ export default function DetailJob({ token }: { token?: string }) {
     );
   };
 
-  const allSelected =
-    paginatedData.length > 0 &&
-    paginatedData.every((item) => selectedIds.includes(item.id));
+  const handleSort = (field: keyof Candidate) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <p className="text-neutral-1000 text-lg font-bold">{formattedSegment}</p>
+    <div className="space-y-4 p-6">
+      <h1 className="text-xl font-bold">Job Applicants</h1>
 
-      {filteredData.length > 0 ? (
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : candidates.length === 0 ? (
+        <div className="flex flex-col items-center justify-center mt-20">
+          <Image
+            src="/assets/illustration/Empty Candidate.svg"
+            alt="No Data"
+            width={400}
+            height={300}
+          />
+          <p className="text-gray-500 mt-4">No candidate found</p>
+        </div>
+      ) : (
         <>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
             <Input
               placeholder="Search candidate..."
               value={search}
@@ -209,148 +151,141 @@ export default function DetailJob({ token }: { token?: string }) {
             />
 
             <Select
-              value={genderFilter}
-              onValueChange={(val) => setGenderFilter(val)}
+              value={dateSortOrder}
+              onValueChange={(val) => setDateSortOrder(val as "asc" | "desc")}
             >
               <SelectTrigger className="w-[180px]">
-                <span>
-                  {genderFilter === "all" ? "All Genders" : genderFilter}
-                </span>
+                {dateSortOrder === "desc" ? "Latest" : "Oldest"}
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="desc">Latest</SelectItem>
+                <SelectItem value="asc">Oldest</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Table */}
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-neutral-30">
-                  <TableHead className="w-10">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={(checked) =>
-                        toggleSelectAll(checked === true)
-                      }
-                    />
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("fullName")}
-                    className="cursor-pointer text-neutral-1000 font-bold p-4"
-                  >
-                    Full Name{" "}
-                    {sortField === "fullName"
-                      ? sortOrder === "asc"
-                        ? "▲"
-                        : "▼"
-                      : ""}
-                  </TableHead>
-                  <TableHead className="text-neutral-1000 font-bold p-4">
-                    Email
-                  </TableHead>
-                  <TableHead className="text-neutral-1000 font-bold p-4">
-                    Phone Number
-                  </TableHead>
-                  <TableHead className="text-neutral-1000 font-bold p-4">
-                    Date of Birth
-                  </TableHead>
-                  <TableHead className="text-neutral-1000 font-bold p-4">
-                    Domicile
-                  </TableHead>
-                  <TableHead
-                    onClick={() => handleSort("gender")}
-                    className="cursor-pointer text-neutral-1000 font-bold p-4"
-                  >
-                    Gender{" "}
-                    {sortField === "gender"
-                      ? sortOrder === "asc"
-                        ? "▲"
-                        : "▼"
-                      : ""}
-                  </TableHead>
-                  <TableHead className="text-neutral-1000 font-bold">
-                    LinkedIn
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.map((candidate) => (
-                  <TableRow key={candidate.id}>
-                    <TableCell className="w-10">
-                      <Checkbox
-                        checked={selectedIds.includes(candidate.id)}
-                        onCheckedChange={(checked) =>
-                          toggleSelect(candidate.id, checked === true)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="p-4">{candidate.fullName}</TableCell>
-                    <TableCell className="p-4">{candidate.email}</TableCell>
-                    <TableCell className="p-4">
-                      {candidate.phoneNumber}
-                    </TableCell>
-                    <TableCell className="p-4">
-                      {candidate.dateOfBirth}
-                    </TableCell>
-                    <TableCell className="p-4">{candidate.domicile}</TableCell>
-                    <TableCell className="p-4">{candidate.gender}</TableCell>
-                    <TableCell className="p-4">
-                      <a
-                        href={candidate.linkedinLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
+          {filteredData.length > 0 ? (
+            <>
+              {/* Table */}
+              <div className="border rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={allSelected}
+                          onCheckedChange={(checked) =>
+                            toggleSelectAll(checked === true)
+                          }
+                        />
+                      </TableHead>
+                      <TableHead
+                        onClick={() => handleSort("fullName")}
+                        className="cursor-pointer"
                       >
-                        {candidate?.linkedinLink || ""}
-                      </a>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                        Full Name{" "}
+                        {sortField === "fullName"
+                          ? sortOrder === "asc"
+                            ? "▲"
+                            : "▼"
+                          : ""}
+                      </TableHead>
+                      <TableHead>Email Address</TableHead>
+                      <TableHead>Phone Number</TableHead>
+                      <TableHead>Date of Birth</TableHead>
+                      <TableHead>Domicile</TableHead>
+                      <TableHead
+                        onClick={() => handleSort("gender")}
+                        className="cursor-pointer"
+                      >
+                        Gender{" "}
+                        {sortField === "gender"
+                          ? sortOrder === "asc"
+                            ? "▲"
+                            : "▼"
+                          : ""}
+                      </TableHead>
+                      <TableHead>LinkedIn</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedData.map((candidate: any) => (
+                      <TableRow key={candidate.applicant.id}>
+                        <TableCell className="w-10">
+                          <Checkbox
+                            checked={selectedIds.includes(
+                              candidate.applicant.id
+                            )}
+                            onCheckedChange={(checked) =>
+                              toggleSelect(
+                                candidate.applicant.id,
+                                checked === true
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {candidate.resume.fullName || "-"}
+                        </TableCell>
+                        <TableCell>{candidate.resume.email || "-"}</TableCell>
+                        <TableCell>
+                          {formatPhoneNumber(candidate.resume.phoneNumber) ||
+                            "-"}
+                        </TableCell>
+                        <TableCell>
+                          {formatDate(candidate.resume.dateOfBirth) || "-"}
+                        </TableCell>
+                        <TableCell>
+                          {candidate.resume.domicile || "-"}
+                        </TableCell>
+                        <TableCell>{candidate.resume.gender || "-"}</TableCell>
+                        <TableCell>
+                          {candidate.resume.linkedinLink ? (
+                            <a
+                              href={candidate.resume.linkedinLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline"
+                            >
+                              {candidate.resume.linkedinLink}
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-          {/* Pagination Controls */}
-          <div className="flex items-center space-x-4 mt-4 justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-            >
-              Previous
-            </Button>
-            <p>
-              Page {page} of {totalPages}
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              disabled={page === totalPages}
-            >
-              Next
-            </Button>
-          </div>
+              {/* Pagination */}
+              <div className="flex justify-end gap-4 mt-4 items-center">
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {page} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className=" p-4 flex justify-center mx-auto w-full">
+              <p className="text-sm">No data</p>
+            </div>
+          )}
         </>
-      ) : (
-        <div className="min-h-screen flex flex-col items-center justify-center text-center space-y-4">
-          <Image
-            src="/assets/illustration/Empty Candidate.svg"
-            alt="No Data"
-            width={1200}
-            height={800}
-            className="size-60 object-contain"
-          />
-          <h2 className="text-lg font-semibold text-neutral-90">
-            No candidate found
-          </h2>
-          <p className="text-neutral-90">
-            Share your job vacancies so that more candidates will apply.{" "}
-          </p>
-        </div>
       )}
     </div>
   );

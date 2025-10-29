@@ -7,7 +7,7 @@ const AdminDetailJobListPage = () => {
 
   return (
     <div className="p-6">
-      <DetailJob token={token} />
+      <DetailJob token={token!} />
     </div>
   );
 };

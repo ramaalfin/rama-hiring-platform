@@ -235,10 +235,6 @@ export const getJobByAdminService = async (
       createdBy: adminId,
     };
 
-    if (status !== "all") {
-      whereClause.status = status;
-    }
-
     if (search) {
       whereClause.OR = [
         { jobName: { contains: search, mode: "insensitive" } },

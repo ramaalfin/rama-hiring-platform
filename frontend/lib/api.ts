@@ -1,6 +1,5 @@
-import { cookies } from "next/headers";
+// lib/api.ts
 import API from "./axios-client";
-import { useAuthStore } from "@/stores/authStore";
 
 type LoginType = {
   email: string;
@@ -41,111 +40,69 @@ type SessionResponseType = {
   sessions: SessionType[];
 };
 
-// authentication API calls
+/* ========================
+   AUTHENTICATION
+======================== */
+
 export const loginMutationFn = async (data: LoginType) => {
   const response = await API.post("/auth/login", data);
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
-
-  return user;
+  return response.data; // berisi { message, user, token? }
 };
 
 export const magicLoginMutationFn = async (data: { email: string }) => {
   const response = await API.post("/auth/magic-login", data);
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
+  return response.data;
 };
 
-export const verifyMagicLoginMutationFn = async ({
-  code,
-}: {
-  code: string;
-}) => {
+export const verifyMagicLoginMutationFn = async ({ code }: { code: string }) => {
   const response = await API.get("/auth/magic-login/verify", {
     params: { code },
     headers: {
-      // flag untuk memberitahu interceptor agar tidak mencoba refresh auth
       "x-skip-refresh": "1",
     },
   });
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
-
-  return response.data;
+  return response.data; // { message, user }
 };
 
 export const registerMutationFn = async (data: RegisterType) => {
   const response = await API.post("/auth/register", data);
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
+  return response.data;
 };
 
 export const magicRegisterMutationFn = async (data: { email: string }) => {
   const response = await API.post("/auth/magic-register", data);
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
+  return response.data;
 };
 
-export const verifyMagicRegisterMutationFn = async ({
-  code,
-}: {
-  code: string;
-}) => {
+export const verifyMagicRegisterMutationFn = async ({ code }: { code: string }) => {
   const response = await API.get("/auth/magic-register/verify", {
     params: { code },
     headers: {
       "x-skip-refresh": "1",
     },
   });
-
-  const result = response.data;
-  const user = result?.user;
-
-  // Simpan user ke Zustand
-  const { setUser } = useAuthStore.getState();
-  setUser(user);
-
   return response.data;
 };
 
 export const forgotPasswordMutationFn = async (data: ForgotPasswordType) => {
-  await API.post("/auth/password/forgot", data);
+  const response = await API.post("/auth/password/forgot", data);
+  return response.data;
 };
 
 export const resetPasswordMutationFn = async (data: ResetPasswordType) => {
-  await API.post("/auth/password/reset", data);
+  const response = await API.post("/auth/password/reset", data);
+  return response.data;
 };
 
 export const verifyEmailMutationFn = async (data: VerifyEmailType) => {
-  await API.post("/auth/email/verify", data);
+  const response = await API.post("/auth/email/verify", data);
+  return response.data;
 };
 
-export const getUserSessionQueryFn = async () => await API.get("/sessions");
+export const getUserSessionQueryFn = async () => {
+  const response = await API.get("/sessions");
+  return response.data.user;
+};
 
 export const sessionQueryFn = async () => {
   const response = await API.get<SessionResponseType>("/sessions/all");
@@ -153,12 +110,18 @@ export const sessionQueryFn = async () => {
 };
 
 export const sessionDeleteMutationFn = async (id: string) => {
-  await API.delete(`/sessions/${id}`);
+  const response = await API.delete(`/sessions/${id}`);
+  return response.data;
 };
 
 export const logoutMutationFn = async () => {
-  await API.get("/auth/logout");
+  const response = await API.get("/auth/logout");
+  return response.data;
 };
+
+/* ========================
+   JOB MANAGEMENT
+======================== */
 
 export const createJobMutationFn = async (data: any, token: string) => {
   const response = await API.post("/jobs", data, {
@@ -202,4 +165,25 @@ export const getAdminJobsFn = async (adminId: string, token: string) => {
   });
 
   return response.data.data;
+};
+
+export const applyJobMutationFn = async (
+  jobId: string,
+  formData: FormData,
+  token: string
+) => {
+  const res = await API.post(`/applications/${jobId}/apply`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};
+
+export const getApplicationsByAdminFn = async (adminId: string, token: string) => {
+  const res = await API.get(`/applications/admin/${adminId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.applications;
 };
