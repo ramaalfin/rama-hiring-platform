@@ -98,7 +98,7 @@ cd frontend
 npm run dev
 ```
 
-###Additional Steps
+### Additional Steps
 
 1. Setup app password di akun Google: https://myaccount.google.com/apppasswords
 2. Masukkan GMAIL_PASS ke environment variable backend.
