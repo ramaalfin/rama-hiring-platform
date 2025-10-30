@@ -5,6 +5,7 @@
 **Link Deploy**
 
 Backend: be-hiring-platform-6439liu6u-ramaalfins-projects.vercel.app
+
 Frontend: (Soon)
 
 **Otentikasi**
