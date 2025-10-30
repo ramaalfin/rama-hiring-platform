@@ -4,7 +4,7 @@
 
 **Link Deploy**
 
-Backend: be-hiring-platform-6439liu6u-ramaalfins-projects.vercel.app
+Backend: https://be-hiring-platform.vercel.app
 
 Frontend: (Soon)
 
