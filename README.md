@@ -2,6 +2,9 @@
 
 ## Project Overview
 
+**Link**
+(soon)
+
 **Otentikasi**
 
 Sistem otentikasi untuk aplikasi web **Get Job** memungkinkan pengguna login dan register menggunakan email & password atau melalui **magic link** yang dikirim ke email. Sistem menggunakan **JWT (access token & refresh token)** untuk menjaga sesi tetap aman, dengan mekanisme refresh token untuk perpanjangan akses otomatis.
