@@ -58,9 +58,11 @@ Fitur ini juga:
 ```bash
 git clone https://github.com/ramaalfin/rama-hiring-platform.git
 cd rama-hiring-platform
-Setup Backend
+```
 
-bash
+2. **Setup Backend**
+
+```bash
 Copy code
 cd backend
 npm install
@@ -70,18 +72,22 @@ npx prisma generate
 # DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
 # GMAIL_USER="your-email@gmail.com"
 # GMAIL_PASS="<app password here>"
-Setup Frontend
+```
 
-bash
+3. **Setup Frontend**
+
+```bash
 Copy code
 cd ../frontend
 npm install
 # Setup environment variables
 # Contoh .env:
-# NEXT_PUBLIC_API_URL=http://localhost:4000
-Run Services
+# NEXT_PUBLIC_API_URL=http://localhost:3000
+```
 
-bash
+4. **Run Services**
+
+```bash
 Copy code
 # Backend
 cd backend
@@ -90,10 +96,10 @@ npm run dev
 # Frontend
 cd frontend
 npm run dev
-Additional Steps
+```
 
-Setup app password di akun Google: https://myaccount.google.com/apppasswords
+###Additional Steps
 
-Masukkan GMAIL_PASS ke environment variable backend.
-
-Akses aplikasi di http://localhost:3000.
+1. Setup app password di akun Google: https://myaccount.google.com/apppasswords
+2. Masukkan GMAIL_PASS ke environment variable backend.
+3. Akses aplikasi di http://localhost:3000.
