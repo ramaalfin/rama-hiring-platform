@@ -6,7 +6,7 @@
 
 Backend: https://be-hiring-platform.vercel.app
 
-Frontend: (Soon)
+Frontend: fe-hiring-platform.vercel.app
 
 **Otentikasi**
 
