@@ -6,7 +6,7 @@
 
 Backend: https://be-hiring-platform.vercel.app
 
-Frontend: fe-hiring-platform.vercel.app
+Frontend: https://fe-hiring-platform.vercel.app
 
 **Otentikasi**
 
@@ -20,40 +20,40 @@ Fitur manajemen job memungkinkan admin membuat, mengelola, dan memfilter lowonga
 
 Modul ini memungkinkan **Job Seeker (Candidate)** melamar pekerjaan melalui form yang dapat menangkap **foto profil** menggunakan kamera dan mengisi data resume seperti:
 
-1. Photo Profile  
-2. Full Name  
-3. Date of Birth  
-4. Pronoun (Gender)  
-5. Domicile  
-6. Phone Number  
-7. Email  
-8. LinkedIn URL  
+1. Photo Profile
+2. Full Name
+3. Date of Birth
+4. Pronoun (Gender)
+5. Domicile
+6. Phone Number
+7. Email
+8. LinkedIn URL
 
 Fitur ini juga:
 
-- Upload foto profil ke Cloudinary (base64 atau file).  
-- Validasi agar user tidak melamar pekerjaan yang sama lebih dari sekali.  
-- Menampilkan toast error saat user sudah pernah melamar.  
+- Upload foto profil ke Cloudinary (base64 atau file).
+- Validasi agar user tidak melamar pekerjaan yang sama lebih dari sekali.
+- Menampilkan toast error saat user sudah pernah melamar.
 
 **Key Features Implemented**
 
-- **Login & Register Tradisional** menggunakan email dan password.  
-- **Magic Link Authentication** untuk login/register sekali pakai via email.  
-- **Refresh Token Mechanism** otomatis saat access token kedaluwarsa.  
-- **Zustand Global State** untuk menyimpan data user dan persistensi di `localStorage`.  
-- **Secure Email Template** untuk magic link dengan branding Get Job.  
-- **Role-Based Access** (`ADMIN`, `USER`) untuk otorisasi halaman.  
-- **Job Management** dengan pagination, sorting, search filter, dan validasi keamanan.  
+- **Login & Register Tradisional** menggunakan email dan password.
+- **Magic Link Authentication** untuk login/register sekali pakai via email.
+- **Refresh Token Mechanism** otomatis saat access token kedaluwarsa.
+- **Zustand Global State** untuk menyimpan data user dan persistensi di `localStorage`.
+- **Secure Email Template** untuk magic link dengan branding Get Job.
+- **Role-Based Access** (`ADMIN`, `USER`) untuk otorisasi halaman.
+- **Job Management** dengan pagination, sorting, search filter, dan validasi keamanan.
 
 ---
 
 ## Tech Stack Used
 
-- **Frontend:** Next.js (App Router), Zustand, TanStack Query, React Webcam, TensorFlow Handpose  
-- **Backend:** Express.js, Prisma ORM, PostgreSQL Lokal  
-- **File & Media:** Cloudinary untuk menyimpan foto profil  
-- **Authentication:** JWT (access & refresh token), Magic Link via Nodemailer  
-- **UI/UX Enhancements:** Toast Notification, Image Preview, Dynamic Form Validation  
+- **Frontend:** Next.js (App Router), Zustand, TanStack Query, React Webcam, TensorFlow Handpose
+- **Backend:** Express.js, Prisma ORM, PostgreSQL Lokal
+- **File & Media:** Cloudinary untuk menyimpan foto profil
+- **Authentication:** JWT (access & refresh token), Magic Link via Nodemailer
+- **UI/UX Enhancements:** Toast Notification, Image Preview, Dynamic Form Validation
 
 ---
 
@@ -109,3 +109,5 @@ npm run dev
 1. Setup app password di akun Google: https://myaccount.google.com/apppasswords
 2. Masukkan GMAIL_PASS ke environment variable backend.
 3. Akses aplikasi di http://localhost:3000.
+4. Anda bisa menggunakan akun Admin alfinrama1@gmail.com, password qwer1234
+5. Kemudian anda bisa mendaftar sebagai candidate
